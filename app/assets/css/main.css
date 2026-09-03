@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * DEFAULT THEME TOKENS
+ * These are fallbacks only. At runtime the Dynamic Theme Engine
+ * (app/plugins/theme.ts) overwrites them with the values stored in
+ * `theme_settings` so an admin can restyle the whole site with no rebuild.
+ * Colors are stored as space-separated RGB channels for Tailwind alpha support.
+ */
+:root {
+  --color-primary: 21 94 117;        /* cyan-800  */
+  --color-secondary: 6 78 59;        /* emerald-900 */
+  --color-accent: 202 138 4;         /* amber-600 */
+  --color-surface: 255 255 255;
+  --color-surface-muted: 246 246 244;
+  --color-ink: 24 24 27;
+  --color-ink-muted: 82 82 91;
+  --color-line: 228 228 224;
+
+  --font-heading: 'Playfair Display', ui-serif, Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --radius: 0.75rem;
+  --container-width: 1200px;
+
+  --font-scale: 1;
+  --btn-style: solid;   /* solid | outline | soft | ghost */
+  --card-style: raised;  /* raised | bordered | flat */
+}
+
+.dark {
+  --color-surface: 12 15 20;
+  --color-surface-muted: 22 27 34;
+  --color-ink: 237 237 235;
+  --color-ink-muted: 161 161 170;
+  --color-line: 39 45 54;
+}
+
+html {
+  font-size: calc(100% * var(--font-scale));
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-surface text-ink font-body antialiased;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-heading font-semibold text-ink;
+  text-wrap: balance;
+}
+
+::selection {
+  background: rgb(var(--color-primary) / 0.9);
+  color: #fff;
+}
+
+/* ---------- Reusable primitives ---------- */
+@layer components {
+  .container-app {
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-8;
+    max-width: var(--container-width);
+  }
+
+  .section {
+    @apply py-14 sm:py-20 lg:py-28;
+  }
+
+  .prose-village {
+    @apply max-w-none leading-relaxed text-ink-muted;
+  }
+  .prose-village :where(h2, h3) { @apply text-ink mt-10 mb-4; }
+  .prose-village :where(p) { @apply my-4; }
+  .prose-village :where(a) { @apply text-primary underline underline-offset-2; }
+  .prose-village :where(ul) { @apply my-4 list-disc pl-6 space-y-1; }
+  .prose-village :where(img) { @apply rounded-theme my-6; }
+
+  /* subtle cultural pattern - opt-in via .pattern-batik */
+  .pattern-batik {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgb(var(--color-primary) / 0.08) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+
+  .glass {
+    @apply border border-white/40 bg-white/70 backdrop-blur-md;
+  }
+  .dark .glass {
+    @apply border-white/10 bg-white/5;
+  }
+}
+
+/* ---------- Motion: fade / reveal ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
