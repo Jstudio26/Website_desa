@@ -1,9 +1,9 @@
 {
-  "name": "village-platform",
-  "version": "0.1.0",
+  "name": "web-desa",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Village Website Platform - modular, fully customizable Sistem Informasi Desa built with Nuxt 3",
+  "description": "Website Desa sederhana - Nuxt 3 + Supabase (Postgres, Auth, Storage)",
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
@@ -11,40 +11,31 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
-    "lint": "eslint .",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx database/migrate.ts",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx database/seed.ts"
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@pinia/nuxt": "^0.7.0",
+    "@nuxtjs/supabase": "^1.4.5",
+    "@supabase/supabase-js": "^2.45.4",
+    "@tiptap/extension-image": "^2.8.0",
+    "@tiptap/extension-link": "^2.8.0",
+    "@tiptap/pm": "^2.8.0",
+    "@tiptap/starter-kit": "^2.8.0",
+    "@tiptap/vue-3": "^2.8.0",
     "@vueuse/core": "^11.2.0",
     "@vueuse/nuxt": "^11.2.0",
-    "bcryptjs": "^2.4.3",
-    "drizzle-orm": "^0.36.4",
-    "jose": "^5.9.6",
-    "nanoid": "^5.0.9",
     "nuxt": "^3.14.1592",
-    "pinia": "^2.2.6",
-    "postgres": "^3.4.5",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
-    "zod": "^3.23.8"
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@nuxt/image": "^1.8.1",
     "@nuxtjs/tailwindcss": "^6.12.2",
-    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.19.43",
-    "dotenv": "^16.4.5",
-    "drizzle-kit": "^0.28.1",
-    "tsx": "^4.19.2",
+    "@types/ws": "^8.18.1",
     "typescript": "^5.6.3",
     "vue-tsc": "^2.1.10"
   },
-  "//storage-adapters": "Install these only when STORAGE_DRIVER=s3 or =supabase: npm i @aws-sdk/client-s3 @aws-sdk/s3-request-presigner @supabase/supabase-js",
   "engines": {
     "node": ">=20.0.0"
   }

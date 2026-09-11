@@ -14,10 +14,6 @@ node_modules
 .env.*
 !.env.example
 
-# Uploads (local storage driver)
-public/uploads/*
-!public/uploads/.gitkeep
-
 # Logs
 *.log
 npm-debug.log*
@@ -28,6 +24,3 @@ npm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 Thumbs.db
-
-# Drizzle
-drizzle/meta/_journal.json.bak

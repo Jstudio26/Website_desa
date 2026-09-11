@@ -17,19 +17,19 @@ const props = withDefaults(defineProps<Props>(), {
 
 const classes = computed(() => {
   const base
-    = 'inline-flex items-center justify-center gap-2 rounded-theme font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 disabled:pointer-events-none'
+    = 'group/btn relative inline-flex items-center justify-center gap-2 rounded-theme font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none'
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
+    sm: 'px-3.5 py-2 text-sm',
     md: 'px-5 py-2.5 text-sm',
-    lg: 'px-7 py-3.5 text-base',
+    lg: 'px-7 py-3.5 text-[0.95rem]',
   }
   const variants = {
-    primary: 'bg-primary text-white hover:brightness-110 active:brightness-95 shadow-sm',
-    secondary: 'bg-secondary text-white hover:brightness-110',
-    accent: 'bg-accent text-white hover:brightness-110',
-    outline: 'border border-line text-ink hover:bg-surface-muted',
+    primary: 'bg-primary text-white shadow-sm hover:bg-primary-deep hover:shadow-red',
+    secondary: 'bg-ink text-white hover:bg-ink/90',
+    accent: 'bg-accent text-white hover:brightness-105',
+    outline: 'border border-line bg-surface text-ink hover:border-primary/40 hover:bg-primary/[0.04] hover:text-primary',
     ghost: 'text-ink hover:bg-surface-muted',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+    danger: 'bg-primary text-white hover:bg-primary-deep',
   }
   return [base, sizes[props.size], variants[props.variant], props.block && 'w-full']
 })

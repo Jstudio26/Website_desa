@@ -5,12 +5,5 @@
     "noUncheckedIndexedAccess": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
-  },
-  "include": [
-    "database/**/*.ts",
-    "drizzle.config.ts",
-    "types/**/*.d.ts",
-    "shared/**/*.ts",
-    "config/**/*.ts"
-  ]
+  }
 }

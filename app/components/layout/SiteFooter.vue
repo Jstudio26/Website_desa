@@ -1,42 +1,46 @@
 <script setup lang="ts">
-const { village, footer } = useSiteConfig()
+import { FOOTER_COLUMNS, FOOTER_BOTTOM_TEXT, FOOTER_DESCRIPTION } from '~/config/site'
+
+const { settings } = useSettings()
 
 const year = new Date().getFullYear()
 const bottom = computed(() =>
-  (footer.value.bottomText || '© {year} {village}.')
+  FOOTER_BOTTOM_TEXT
     .replace('{year}', String(year))
-    .replace('{village}', village.value.villageName),
+    .replace('{village}', settings.value.villageName),
 )
 const socials = computed(() => {
-  const s = village.value.socialMedia
+  const s = settings.value.social
   return [
     { k: 'instagram', url: s.instagram },
     { k: 'facebook', url: s.facebook },
     { k: 'youtube', url: s.youtube },
+    { k: 'tiktok', url: s.tiktok },
   ].filter((x) => x.url)
 })
 </script>
 
 <template>
-  <footer class="relative overflow-hidden bg-secondary text-white/80">
-    <div class="pattern-batik absolute inset-0 opacity-[0.15]" />
-    <div class="container-app relative">
-      <!-- top -->
-      <div class="grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-5">
+  <footer class="grain relative overflow-hidden bg-primary-deep text-white/75">
+    <WaveDivider flip color="text-canvas" class="relative" />
+    <div class="pattern-flag absolute inset-0 opacity-50" />
+
+    <div class="container-app relative pt-8">
+      <div class="grid gap-10 pb-12 pt-6 md:grid-cols-2 lg:grid-cols-4">
         <div class="lg:col-span-2">
           <div class="flex items-center gap-3">
-            <img v-if="village.logo" :src="village.logo" alt="" class="h-11 w-11 rounded-md bg-white/10 object-contain p-1">
-            <span v-else class="grid h-11 w-11 place-items-center rounded-md bg-white/10 font-heading text-lg font-bold text-white">
-              {{ village.villageName.charAt(0) }}
+            <span class="grid h-12 w-12 place-items-center overflow-hidden rounded-xl bg-white shadow-lg">
+              <img v-if="settings.logoUrl" :src="settings.logoUrl" alt="" class="h-8 w-8 object-contain">
+              <span v-else class="font-heading text-lg font-extrabold text-primary">{{ settings.villageName.charAt(0) }}</span>
             </span>
             <div>
-              <p class="font-heading text-lg font-semibold text-white">{{ village.villageName }}</p>
+              <p class="font-heading text-lg font-extrabold text-white">{{ settings.villageName }}</p>
               <p class="text-xs uppercase tracking-wide opacity-70">
-                {{ [village.district, village.regency].filter(Boolean).join(', ') }}
+                {{ [settings.district, settings.regency].filter(Boolean).join(', ') }}
               </p>
             </div>
           </div>
-          <p class="mt-4 max-w-sm text-sm leading-relaxed">{{ footer.description }}</p>
+          <p class="mt-4 max-w-sm text-sm leading-relaxed">{{ FOOTER_DESCRIPTION }}</p>
           <div v-if="socials.length" class="mt-5 flex gap-2">
             <a
               v-for="s in socials"
@@ -44,7 +48,7 @@ const socials = computed(() => {
               :href="s.url"
               target="_blank"
               rel="noopener"
-              class="grid h-9 w-9 place-items-center rounded-full bg-white/10 transition hover:bg-white/20"
+              class="grid h-9 w-9 place-items-center rounded-full bg-white/10 transition hover:bg-white hover:text-primary"
               :aria-label="s.k"
             >
               <AppIcon :name="s.k" :size="16" />
@@ -52,58 +56,19 @@ const socials = computed(() => {
           </div>
         </div>
 
-        <div v-for="col in footer.columns" :key="col.title">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-white">{{ col.title }}</h3>
+        <div v-for="col in FOOTER_COLUMNS" :key="col.title">
+          <h3 class="text-sm font-bold uppercase tracking-wide text-white">{{ col.title }}</h3>
           <ul class="mt-4 space-y-2.5 text-sm">
             <li v-for="l in col.links" :key="l.url">
-              <NuxtLink :to="l.url" class="transition hover:text-white hover:underline">{{ l.label }}</NuxtLink>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-white">Kontak</h3>
-          <ul class="mt-4 space-y-3 text-sm">
-            <li v-if="village.contact.address" class="flex gap-2.5">
-              <AppIcon name="mapPin" :size="16" class="mt-0.5 shrink-0 opacity-70" />
-              <span>{{ village.contact.address }}</span>
-            </li>
-            <li v-if="village.contact.phone" class="flex gap-2.5">
-              <AppIcon name="phone" :size="16" class="mt-0.5 shrink-0 opacity-70" />
-              <a :href="`tel:${village.contact.phone}`" class="hover:text-white">{{ village.contact.phone }}</a>
-            </li>
-            <li v-if="village.contact.email" class="flex gap-2.5">
-              <AppIcon name="mail" :size="16" class="mt-0.5 shrink-0 opacity-70" />
-              <a :href="`mailto:${village.contact.email}`" class="hover:text-white">{{ village.contact.email }}</a>
+              <NuxtLink :to="l.url" class="link-underline transition hover:text-white">{{ l.label }}</NuxtLink>
             </li>
           </ul>
         </div>
       </div>
 
-      <!-- KKT credit -->
-      <div
-        v-if="footer.showCredit"
-        class="flex flex-col gap-3 border-t border-white/15 py-6 text-sm sm:flex-row sm:items-center sm:justify-between"
-      >
-        <p class="max-w-2xl opacity-80">
-          {{ footer.creditText }}
-        </p>
-        <NuxtLink
-          v-if="footer.showDeveloperLink"
-          :to="footer.developerLinkUrl"
-          class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/25 px-4 py-2 font-medium text-white transition hover:bg-white/10"
-        >
-          {{ footer.developerLinkLabel }}
-          <AppIcon name="arrowRight" :size="15" />
-        </NuxtLink>
-      </div>
-
-      <div class="flex flex-col gap-2 border-t border-white/15 py-5 text-xs opacity-70 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex flex-col gap-2 border-t border-white/15 py-5 text-xs opacity-75 sm:flex-row sm:items-center sm:justify-between">
         <p>{{ bottom }}</p>
-        <p class="flex items-center gap-3">
-          <NuxtLink to="/tentang-website" class="hover:text-white">Tentang Website</NuxtLink>
-          <NuxtLink to="/kebijakan-privasi" class="hover:text-white">Kebijakan Privasi</NuxtLink>
-        </p>
+        <NuxtLink to="/admin" class="transition hover:text-white">Login Admin</NuxtLink>
       </div>
     </div>
   </footer>
