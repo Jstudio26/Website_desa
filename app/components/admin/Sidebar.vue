@@ -8,7 +8,11 @@ const links = [
   { label: 'Berita', to: '/admin/berita', icon: 'news' },
   { label: 'Pengumuman', to: '/admin/pengumuman', icon: 'megaphone' },
   { label: 'Galeri', to: '/admin/galeri', icon: 'gallery' },
-  { label: 'Profil Desa', to: '/admin/profil', icon: 'home' },
+  { label: 'Organisasi', to: '/admin/organisasi', icon: 'users' },
+  { label: 'Peta Wilayah', to: '/admin/peta', icon: 'mapPin' },
+  { label: 'Layanan Surat', to: '/admin/layanan-surat', icon: 'fileText' },
+  { label: 'Pengaduan', to: '/admin/pengaduan', icon: 'shield' },
+  { label: 'Profil Kelurahan', to: '/admin/profil', icon: 'home' },
   { label: 'Pesan Masuk', to: '/admin/pesan', icon: 'inbox' },
 ]
 

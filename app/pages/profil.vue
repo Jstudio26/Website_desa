@@ -21,20 +21,20 @@ const stats = computed(() => {
   return [
     { label: 'Penduduk', value: s.population },
     { label: 'Kepala Keluarga', value: s.households },
-    { label: 'Dusun', value: s.hamlets },
+    { label: 'Lingkungan', value: s.hamlets },
     { label: 'Luas (km²)', value: s.areaKm2 },
   ].filter((x) => x.value != null)
 })
 
-useHead({ title: 'Profil Desa' })
+useHead({ title: 'Profil Kelurahan' })
 </script>
 
 <template>
   <div>
     <PageHero
-      title="Profil Desa"
+      title="Profil Kelurahan"
       :subtitle="settings.tagline"
-      :breadcrumb="[{ label: 'Profil Desa' }]"
+      :breadcrumb="[{ label: 'Profil Kelurahan' }]"
     />
 
     <!-- Wilayah + statistik -->
@@ -101,11 +101,11 @@ useHead({ title: 'Profil Desa' })
       </div>
     </section>
 
-    <!-- Perangkat Desa -->
+    <!-- Perangkat Kelurahan -->
     <section v-if="officials?.length" class="section bg-surface-muted/50">
       <div class="container-app">
         <span class="eyebrow"><span class="h-px w-6 bg-primary" /> Pemerintahan</span>
-        <h2 class="mt-4 font-heading text-2xl font-extrabold">Perangkat Desa</h2>
+        <h2 class="mt-4 font-heading text-2xl font-extrabold">Perangkat Kelurahan</h2>
         <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="o in officials" :key="o.id" class="card card-hover p-5 text-center">
             <div class="mx-auto h-24 w-24 overflow-hidden rounded-2xl bg-surface-muted ring-4 ring-primary/10">

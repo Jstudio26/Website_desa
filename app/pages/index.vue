@@ -64,7 +64,7 @@ useHead(() => ({
       <div class="container-app relative pb-24 pt-24 sm:pb-28 sm:pt-32">
         <span class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold tracking-wide backdrop-blur">
           <AppIcon name="mapPin" :size="14" />
-          {{ [settings.district, settings.regency, settings.province].filter(Boolean).join(', ') || 'Sistem Informasi Desa' }}
+          {{ [settings.district, settings.regency, settings.province].filter(Boolean).join(', ') || 'Sistem Informasi Kelurahan' }}
         </span>
 
         <h1 class="mt-6 max-w-3xl text-fluid-h1 font-extrabold tracking-tight text-white">
@@ -74,7 +74,7 @@ useHead(() => ({
 
         <div class="mt-8 flex flex-wrap gap-3">
           <UiButton to="/profil" size="lg" class="bg-white !text-primary hover:!bg-white/90">
-            Profil Desa
+            Profil Kelurahan
           </UiButton>
           <UiButton to="/berita" size="lg" variant="ghost" class="border border-white/40 !text-white hover:!bg-white/10">
             <template #icon><AppIcon name="news" :size="17" /></template>
@@ -228,7 +228,7 @@ useHead(() => ({
           <div class="relative mx-auto max-w-xl">
             <h2 class="font-heading text-2xl font-extrabold text-white sm:text-3xl">Ada pertanyaan atau aspirasi?</h2>
             <p class="mt-3 text-white/85">
-              Sampaikan langsung kepada pemerintah desa melalui halaman kontak. Kami siap membantu.
+              Sampaikan langsung kepada pemerintah kelurahan melalui halaman kontak. Kami siap membantu.
             </p>
             <UiButton to="/kontak" size="lg" class="mt-7 bg-white !text-primary hover:!bg-white/90">
               Hubungi Kami

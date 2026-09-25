@@ -26,7 +26,7 @@ const socials = computed(() => {
     <div class="pattern-flag absolute inset-0 opacity-50" />
 
     <div class="container-app relative pt-8">
-      <div class="grid gap-10 pb-12 pt-6 md:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-10 pb-12 pt-6 md:grid-cols-2 lg:grid-cols-5">
         <div class="lg:col-span-2">
           <div class="flex items-center gap-3">
             <span class="grid h-12 w-12 place-items-center overflow-hidden rounded-xl bg-white shadow-lg">

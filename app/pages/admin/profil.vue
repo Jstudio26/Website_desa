@@ -11,7 +11,11 @@ const { upload, remove: removeMedia } = useMedia()
 const { refresh: refreshSettings } = useSettings()
 
 // ---- Settings form -------------------------------------------------------
-const form = reactive<SettingsData>({ ...DEFAULT_SETTINGS, social: { ...DEFAULT_SETTINGS.social } })
+const form = reactive<SettingsData>({
+  ...DEFAULT_SETTINGS,
+  social: { ...DEFAULT_SETTINGS.social },
+  demographics: { ...DEFAULT_SETTINGS.demographics },
+})
 const missionText = ref('')
 const loading = ref(true)
 const saving = ref(false)
@@ -22,6 +26,7 @@ const { data: loaded } = await useAsyncData('admin-settings', async () => {
 })
 Object.assign(form, DEFAULT_SETTINGS, loaded.value, {
   social: { ...DEFAULT_SETTINGS.social, ...(loaded.value?.social ?? {}) },
+  demographics: { ...DEFAULT_SETTINGS.demographics, ...(loaded.value?.demographics ?? {}) },
 })
 missionText.value = (form.mission ?? []).join('\n')
 loading.value = false
@@ -50,6 +55,17 @@ async function saveSettings() {
       households: numOrNull(form.households),
       hamlets: numOrNull(form.hamlets),
       areaKm2: numOrNull(form.areaKm2),
+      demographics: {
+        balita0_11: numOrNull(form.demographics.balita0_11),
+        balita1_2: numOrNull(form.demographics.balita1_2),
+        balita2_3: numOrNull(form.demographics.balita2_3),
+        balita3_4: numOrNull(form.demographics.balita3_4),
+        balita4_5: numOrNull(form.demographics.balita4_5),
+        ibuHamil: numOrNull(form.demographics.ibuHamil),
+        lansia60_69: numOrNull(form.demographics.lansia60_69),
+        lansia70_79: numOrNull(form.demographics.lansia70_79),
+        lansia80Plus: numOrNull(form.demographics.lansia80Plus),
+      },
     }
     const { error } = await supabase
       .from('settings')
@@ -57,7 +73,7 @@ async function saveSettings() {
       .eq('id', 1)
     if (error) throw error
     await refreshSettings()
-    toast.success('Profil desa disimpan')
+    toast.success('Profil kelurahan disimpan')
   }
   catch (e) {
     toast.error('Gagal menyimpan', e instanceof Error ? e.message : '')
@@ -134,12 +150,12 @@ async function removeOfficial() {
   refreshOfficials()
 }
 
-useHead({ title: 'Profil Desa' })
+useHead({ title: 'Profil Kelurahan' })
 </script>
 
 <template>
   <div>
-    <AdminPageHeader title="Profil Desa" description="Identitas, kontak, dan data desa.">
+    <AdminPageHeader title="Profil Kelurahan" description="Identitas, kontak, dan data kelurahan.">
       <template #actions>
         <UiButton :loading="saving" @click="saveSettings">Simpan Profil</UiButton>
       </template>
@@ -154,7 +170,7 @@ useHead({ title: 'Profil Desa' })
       <section class="rounded-theme border border-line bg-surface p-5 sm:p-6">
         <h2 class="font-heading text-lg font-semibold">Identitas</h2>
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
-          <UiInput v-model="form.villageName" label="Nama Desa" required />
+          <UiInput v-model="form.villageName" label="Nama Kelurahan" required />
           <UiInput v-model="form.tagline" label="Tagline" />
           <div class="sm:col-span-2">
             <UiTextarea v-model="form.shortDescription" label="Deskripsi singkat" :rows="2" />
@@ -162,7 +178,7 @@ useHead({ title: 'Profil Desa' })
           <UiInput v-model="form.district" label="Kecamatan" />
           <UiInput v-model="form.regency" label="Kabupaten" />
           <UiInput v-model="form.province" label="Provinsi" />
-          <UiInput v-model="form.address" label="Alamat kantor desa" />
+          <UiInput v-model="form.address" label="Alamat kantor kelurahan" />
         </div>
 
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
@@ -206,14 +222,41 @@ useHead({ title: 'Profil Desa' })
         </div>
       </section>
 
-      <!-- Data desa -->
+      <!-- Data kelurahan -->
       <section class="rounded-theme border border-line bg-surface p-5 sm:p-6">
-        <h2 class="font-heading text-lg font-semibold">Data Desa</h2>
+        <h2 class="font-heading text-lg font-semibold">Data Kelurahan</h2>
         <div class="mt-4 grid gap-4 sm:grid-cols-4">
           <UiInput v-model="form.population" label="Jumlah penduduk" type="number" />
           <UiInput v-model="form.households" label="Kepala keluarga" type="number" />
-          <UiInput v-model="form.hamlets" label="Jumlah dusun" type="number" />
+          <UiInput v-model="form.hamlets" label="Jumlah lingkungan" type="number" />
           <UiInput v-model="form.areaKm2" label="Luas wilayah (km²)" type="number" />
+        </div>
+      </section>
+
+      <!-- Data kependudukan -->
+      <section class="rounded-theme border border-line bg-surface p-5 sm:p-6">
+        <h2 class="font-heading text-lg font-semibold">Data Kependudukan</h2>
+        <p class="mt-1 text-sm text-ink-muted">Rincian jumlah penduduk per kelompok umur.</p>
+
+        <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">Balita</p>
+        <div class="mt-2 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <UiInput v-model="form.demographics.balita0_11" label="0 - 11 bulan" type="number" />
+          <UiInput v-model="form.demographics.balita1_2" label="1 - 2 tahun" type="number" />
+          <UiInput v-model="form.demographics.balita2_3" label="2 - 3 tahun" type="number" />
+          <UiInput v-model="form.demographics.balita3_4" label="3 - 4 tahun" type="number" />
+          <UiInput v-model="form.demographics.balita4_5" label="4 - 5 tahun" type="number" />
+        </div>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-wide text-ink-muted">Ibu Hamil</p>
+        <div class="mt-2 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <UiInput v-model="form.demographics.ibuHamil" label="Jumlah ibu hamil" type="number" />
+        </div>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-wide text-ink-muted">Lansia</p>
+        <div class="mt-2 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <UiInput v-model="form.demographics.lansia60_69" label="60 - 69 tahun" type="number" />
+          <UiInput v-model="form.demographics.lansia70_79" label="70 - 79 tahun" type="number" />
+          <UiInput v-model="form.demographics.lansia80Plus" label="80 tahun ke atas" type="number" />
         </div>
       </section>
 
@@ -228,16 +271,16 @@ useHead({ title: 'Profil Desa' })
 
       <!-- Sejarah -->
       <section class="rounded-theme border border-line bg-surface p-5 sm:p-6">
-        <h2 class="font-heading text-lg font-semibold">Sejarah Desa</h2>
+        <h2 class="font-heading text-lg font-semibold">Sejarah Kelurahan</h2>
         <div class="mt-4">
           <RichTextEditor v-model="form.history" folder="profil" />
         </div>
       </section>
 
-      <!-- Perangkat desa -->
+      <!-- Perangkat kelurahan -->
       <section class="rounded-theme border border-line bg-surface p-5 sm:p-6">
         <div class="flex items-center justify-between">
-          <h2 class="font-heading text-lg font-semibold">Perangkat Desa</h2>
+          <h2 class="font-heading text-lg font-semibold">Perangkat Kelurahan</h2>
           <UiButton size="sm" variant="outline" @click="newOfficial">
             <template #icon><AppIcon name="plus" :size="14" /></template> Tambah
           </UiButton>
@@ -257,7 +300,7 @@ useHead({ title: 'Profil Desa' })
             <button class="p-1.5 text-ink-muted hover:text-red-500" @click="confirmId = o.id"><AppIcon name="trash" :size="15" /></button>
           </div>
         </div>
-        <p v-else class="mt-4 text-sm text-ink-muted">Belum ada data perangkat desa.</p>
+        <p v-else class="mt-4 text-sm text-ink-muted">Belum ada data perangkat kelurahan.</p>
       </section>
     </div>
 

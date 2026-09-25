@@ -58,7 +58,7 @@ useHead({ title: 'Kontak' })
   <div>
     <PageHero
       title="Kontak"
-      subtitle="Hubungi pemerintah desa untuk informasi, pengaduan, atau kerja sama."
+      subtitle="Hubungi pemerintah kelurahan untuk informasi, pengaduan, atau kerja sama."
       :breadcrumb="[{ label: 'Kontak' }]"
     />
 

@@ -16,6 +16,8 @@ const openDropdown = ref<string | null>(null)
 watch(() => route.fullPath, () => { mobileOpen.value = false; openDropdown.value = null })
 
 const isActive = (url: string) => (url === '/' ? route.path === '/' : route.path.startsWith(url))
+const isActiveGroup = (item: (typeof navigation)[number]) =>
+  item.children.length ? item.children.some((c) => isActive(c.url)) : isActive(item.url)
 </script>
 
 <template>
@@ -46,29 +48,53 @@ const isActive = (url: string) => (url === '/' ? route.path === '/' : route.path
               {{ settings.villageName }}
             </span>
             <span class="block truncate text-[0.7rem] font-medium uppercase tracking-wide opacity-70">
-              {{ settings.district || 'Sistem Informasi Desa' }}
+              {{ settings.district || 'Sistem Informasi Kelurahan' }}
             </span>
           </span>
         </NuxtLink>
 
         <!-- Desktop nav -->
         <nav class="hidden items-center gap-0.5 lg:flex">
-          <NuxtLink
+          <div
             v-for="item in navigation"
             :key="item.id"
-            :to="item.url"
-            class="group/nav relative rounded-lg px-3 py-2 text-sm font-semibold transition"
-            :class="[
-              solid ? 'text-ink hover:text-primary' : 'text-white/90 hover:text-white',
-              isActive(item.url) && (solid ? '!text-primary' : '!text-white'),
-            ]"
+            class="relative"
+            @mouseenter="item.children.length && (openDropdown = item.id)"
+            @mouseleave="item.children.length && (openDropdown = null)"
           >
-            {{ item.label }}
-            <span
-              class="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-primary transition-all duration-300"
-              :class="isActive(item.url) ? 'opacity-100' : 'opacity-0 scale-x-0 group-hover/nav:opacity-40 group-hover/nav:scale-x-100'"
-            />
-          </NuxtLink>
+            <NuxtLink
+              :to="item.url"
+              class="group/nav relative flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold transition"
+              :class="[
+                solid ? 'text-ink hover:text-primary' : 'text-white/90 hover:text-white',
+                isActiveGroup(item) && (solid ? '!text-primary' : '!text-white'),
+              ]"
+            >
+              {{ item.label }}
+              <AppIcon v-if="item.children.length" name="chevronDown" :size="13" />
+              <span
+                class="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-primary transition-all duration-300"
+                :class="isActiveGroup(item) ? 'opacity-100' : 'opacity-0 scale-x-0 group-hover/nav:opacity-40 group-hover/nav:scale-x-100'"
+              />
+            </NuxtLink>
+
+            <Transition name="fade">
+              <div
+                v-if="item.children.length && openDropdown === item.id"
+                class="absolute left-0 top-full min-w-[13rem] rounded-lg border border-line/80 bg-canvas p-1.5 shadow-lift"
+              >
+                <NuxtLink
+                  v-for="child in item.children"
+                  :key="child.id"
+                  :to="child.url"
+                  class="block rounded-md px-3 py-2 text-sm font-medium transition"
+                  :class="isActive(child.url) ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-surface-muted'"
+                >
+                  {{ child.label }}
+                </NuxtLink>
+              </div>
+            </Transition>
+          </div>
         </nav>
 
         <div class="flex items-center gap-2">
@@ -89,16 +115,30 @@ const isActive = (url: string) => (url === '/' ? route.path === '/' : route.path
     <Transition name="slide">
       <div v-if="mobileOpen" class="border-b border-line bg-canvas lg:hidden">
         <nav class="container-app max-h-[70vh] space-y-1 overflow-y-auto py-4">
-          <NuxtLink
-            v-for="item in navigation"
-            :key="item.id"
-            :to="item.url"
-            class="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold"
-            :class="isActive(item.url) ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-surface-muted'"
-          >
-            {{ item.label }}
-            <AppIcon v-if="isActive(item.url)" name="chevronRight" :size="15" />
-          </NuxtLink>
+          <template v-for="item in navigation" :key="item.id">
+            <template v-if="item.children.length">
+              <p class="px-3 pt-3 text-xs font-bold uppercase tracking-wide text-ink-muted">{{ item.label }}</p>
+              <NuxtLink
+                v-for="child in item.children"
+                :key="child.id"
+                :to="child.url"
+                class="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold"
+                :class="isActive(child.url) ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-surface-muted'"
+              >
+                {{ child.label }}
+                <AppIcon v-if="isActive(child.url)" name="chevronRight" :size="15" />
+              </NuxtLink>
+            </template>
+            <NuxtLink
+              v-else
+              :to="item.url"
+              class="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold"
+              :class="isActive(item.url) ? 'bg-primary/10 text-primary' : 'text-ink hover:bg-surface-muted'"
+            >
+              {{ item.label }}
+              <AppIcon v-if="isActive(item.url)" name="chevronRight" :size="15" />
+            </NuxtLink>
+          </template>
           <UiButton to="/kontak" block class="mt-3">Kontak</UiButton>
         </nav>
       </div>
@@ -109,4 +149,6 @@ const isActive = (url: string) => (url === '/' ? route.path === '/' : route.path
 <style scoped>
 .slide-enter-active, .slide-leave-active { transition: all 0.25s ease; }
 .slide-enter-from, .slide-leave-to { opacity: 0; transform: translateY(-8px); }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.15s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

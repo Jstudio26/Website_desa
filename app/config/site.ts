@@ -13,10 +13,29 @@ export interface NavItem {
 
 export const NAV: NavItem[] = [
   { id: 'home', label: 'Beranda', url: '/', children: [] },
-  { id: 'profil', label: 'Profil Desa', url: '/profil', children: [] },
+  {
+    id: 'kelurahan',
+    label: 'Kelurahan',
+    url: '/profil',
+    children: [
+      { id: 'profil', label: 'Profil Kelurahan', url: '/profil' },
+      { id: 'data-penduduk', label: 'Data Penduduk', url: '/data-penduduk' },
+      { id: 'organisasi', label: 'Organisasi', url: '/organisasi' },
+      { id: 'peta', label: 'Peta Wilayah', url: '/peta' },
+    ],
+  },
   { id: 'berita', label: 'Berita', url: '/berita', children: [] },
   { id: 'pengumuman', label: 'Pengumuman', url: '/pengumuman', children: [] },
   { id: 'galeri', label: 'Galeri', url: '/galeri', children: [] },
+  {
+    id: 'layanan',
+    label: 'Layanan',
+    url: '/layanan-surat',
+    children: [
+      { id: 'layanan-surat', label: 'Layanan Surat', url: '/layanan-surat' },
+      { id: 'pengaduan', label: 'Pengaduan', url: '/pengaduan' },
+    ],
+  },
 ]
 
 export const FOOTER_COLUMNS: { title: string, links: { label: string, url: string }[] }[] = [
@@ -29,9 +48,19 @@ export const FOOTER_COLUMNS: { title: string, links: { label: string, url: strin
     ],
   },
   {
-    title: 'Desa',
+    title: 'Kelurahan',
     links: [
-      { label: 'Profil Desa', url: '/profil' },
+      { label: 'Profil Kelurahan', url: '/profil' },
+      { label: 'Data Penduduk', url: '/data-penduduk' },
+      { label: 'Organisasi', url: '/organisasi' },
+      { label: 'Peta Wilayah', url: '/peta' },
+    ],
+  },
+  {
+    title: 'Layanan',
+    links: [
+      { label: 'Layanan Surat', url: '/layanan-surat' },
+      { label: 'Pengaduan', url: '/pengaduan' },
       { label: 'Kontak', url: '/kontak' },
     ],
   },
@@ -40,6 +69,6 @@ export const FOOTER_COLUMNS: { title: string, links: { label: string, url: strin
 /** {village} and {year} are replaced at render time. */
 export const FOOTER_BOTTOM_TEXT = '© {year} {village}. Seluruh hak cipta dilindungi.'
 export const FOOTER_DESCRIPTION =
-  'Portal informasi resmi desa. Sarana komunikasi antara pemerintah desa dan masyarakat.'
+  'Portal informasi resmi kelurahan. Sarana komunikasi antara pemerintah kelurahan dan masyarakat.'
 
 export const SITE_LOCALE = 'id-ID'

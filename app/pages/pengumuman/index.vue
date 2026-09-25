@@ -5,6 +5,6 @@
   <PostListView
     type="pengumuman"
     title="Pengumuman"
-    subtitle="Informasi resmi dan pemberitahuan dari pemerintah desa."
+    subtitle="Informasi resmi dan pemberitahuan dari pemerintah kelurahan."
   />
 </template>

@@ -2,20 +2,20 @@ import type { SettingsData } from '~/types/database'
 import type { Database } from '~/types/supabase'
 
 export const DEFAULT_SETTINGS: SettingsData = {
-  villageName: 'Nama Desa',
-  tagline: 'Desa yang tumbuh bersama budaya, alam, dan masyarakat.',
+  villageName: 'Nama Kelurahan',
+  tagline: 'Kelurahan yang tumbuh bersama budaya, alam, dan masyarakat.',
   shortDescription:
-    'Portal informasi resmi pemerintah desa. Temukan berita, pengumuman, galeri, dan profil desa dalam satu tempat.',
+    'Portal informasi resmi pemerintah kelurahan. Temukan berita, pengumuman, galeri, dan profil kelurahan dalam satu tempat.',
   logoUrl: '',
   heroImageUrl: '',
-  history: '<p>Tuliskan sejarah singkat desa di sini melalui menu Admin → Profil Desa.</p>',
-  vision: 'Mewujudkan desa yang mandiri, sejahtera, dan berbudaya.',
+  history: '<p>Tuliskan sejarah singkat kelurahan di sini melalui menu Admin → Profil Kelurahan.</p>',
+  vision: 'Mewujudkan kelurahan yang mandiri, sejahtera, dan berbudaya.',
   mission: [
     'Meningkatkan pelayanan publik',
     'Mendorong ekonomi masyarakat',
     'Melestarikan lingkungan dan budaya',
   ],
-  address: 'Kantor Desa',
+  address: 'Kantor Kelurahan',
   phone: '',
   email: '',
   whatsapp: '',
@@ -28,6 +28,18 @@ export const DEFAULT_SETTINGS: SettingsData = {
   regency: 'Nama Kabupaten',
   province: 'Nama Provinsi',
   social: { instagram: '', facebook: '', youtube: '', tiktok: '' },
+  demographics: {
+    balita0_11: null,
+    balita1_2: null,
+    balita2_3: null,
+    balita3_4: null,
+    balita4_5: null,
+    ibuHamil: null,
+    lansia60_69: null,
+    lansia70_79: null,
+    lansia80Plus: null,
+  },
+  mapCenter: { lat: null, lng: null, zoom: 13 },
 }
 
 /**

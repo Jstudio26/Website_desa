@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@nuxt/image',
     '@nuxtjs/supabase',
+    '@nuxt/eslint',
   ],
 
   css: ['~/assets/css/main.css'],

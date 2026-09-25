@@ -85,7 +85,7 @@ useHead({ title: 'Galeri' })
 
 <template>
   <div>
-    <AdminPageHeader title="Galeri" description="Kelola foto kegiatan desa.">
+    <AdminPageHeader title="Galeri" description="Kelola foto kegiatan kelurahan.">
       <template #actions>
         <label class="inline-flex cursor-pointer items-center gap-2 rounded-theme bg-primary px-5 py-2.5 text-sm font-medium text-white hover:brightness-110">
           <AppIcon :name="uploading ? 'clock' : 'upload'" :size="15" />
@@ -116,7 +116,7 @@ useHead({ title: 'Galeri' })
       </div>
     </div>
 
-    <UiEmptyState v-else title="Belum ada foto" message="Unggah foto pertama untuk galeri desa." />
+    <UiEmptyState v-else title="Belum ada foto" message="Unggah foto pertama untuk galeri kelurahan." />
 
     <UiModal v-model:open="modalOpen" title="Ubah Foto" size="md">
       <div v-if="editItem" class="space-y-4">

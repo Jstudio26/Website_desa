@@ -56,7 +56,7 @@ useHead({ title: props.label })
 
 <template>
   <div>
-    <AdminPageHeader :title="label" :description="`Kelola ${label.toLowerCase()} desa.`">
+    <AdminPageHeader :title="label" :description="`Kelola ${label.toLowerCase()} kelurahan.`">
       <template #actions>
         <UiButton :to="`/admin/${type}/new`">
           <template #icon><AppIcon name="plus" :size="15" /></template>

@@ -9,26 +9,30 @@ const supabase = useSupabaseClient<Database>()
 
 const { data } = await useAsyncData('admin-dashboard', async () => {
   const count = (q: PromiseLike<{ count: number | null }>) => q.then((r) => r.count ?? 0)
-  const [berita, pengumuman, foto, pesanBaru, pesan] = await Promise.all([
+  const [berita, pengumuman, foto, pesanBaru, suratBaru, pengaduanBaru, pesan] = await Promise.all([
     count(supabase.from('posts').select('id', { count: 'exact', head: true }).eq('type', 'berita')),
     count(supabase.from('posts').select('id', { count: 'exact', head: true }).eq('type', 'pengumuman')),
     count(supabase.from('gallery').select('id', { count: 'exact', head: true })),
     count(supabase.from('messages').select('id', { count: 'exact', head: true }).eq('is_read', false)),
+    count(supabase.from('letter_requests').select('id', { count: 'exact', head: true }).eq('status', 'diajukan')),
+    count(supabase.from('complaints').select('id', { count: 'exact', head: true }).eq('status', 'diterima')),
     supabase.from('messages').select('*').order('created_at', { ascending: false }).limit(5),
   ])
   return {
-    counts: { berita, pengumuman, foto, pesanBaru },
+    counts: { berita, pengumuman, foto, pesanBaru, suratBaru, pengaduanBaru },
     pesan: (pesan.data ?? []) as Message[],
   }
 })
 
 const cards = computed(() => {
-  const c = data.value?.counts ?? { berita: 0, pengumuman: 0, foto: 0, pesanBaru: 0 }
+  const c = data.value?.counts ?? { berita: 0, pengumuman: 0, foto: 0, pesanBaru: 0, suratBaru: 0, pengaduanBaru: 0 }
   return [
     { label: 'Berita', value: c.berita, icon: 'news', to: '/admin/berita' },
     { label: 'Pengumuman', value: c.pengumuman, icon: 'megaphone', to: '/admin/pengumuman' },
     { label: 'Foto Galeri', value: c.foto, icon: 'gallery', to: '/admin/galeri' },
     { label: 'Pesan Belum Dibaca', value: c.pesanBaru, icon: 'inbox', to: '/admin/pesan' },
+    { label: 'Surat Diajukan', value: c.suratBaru, icon: 'fileText', to: '/admin/layanan-surat' },
+    { label: 'Pengaduan Baru', value: c.pengaduanBaru, icon: 'shield', to: '/admin/pengaduan' },
   ]
 })
 

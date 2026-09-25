@@ -25,7 +25,7 @@ useHead({ title: 'Galeri' })
 
 <template>
   <div>
-    <PageHero title="Galeri" subtitle="Dokumentasi kegiatan dan potret desa." :breadcrumb="[{ label: 'Galeri' }]" />
+    <PageHero title="Galeri" subtitle="Dokumentasi kegiatan dan potret kelurahan." :breadcrumb="[{ label: 'Galeri' }]" />
 
     <section class="section container-app">
       <div v-if="items?.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">

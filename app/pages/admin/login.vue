@@ -65,10 +65,10 @@ useHead({ title: 'Masuk Admin' })
             <AppIcon name="shield" :size="14" /> Panel Administrasi
           </span>
           <h1 class="mt-5 font-heading text-3xl font-extrabold leading-tight text-white sm:text-[2.5rem]">
-            Kelola informasi desa dari satu tempat.
+            Kelola informasi kelurahan dari satu tempat.
           </h1>
           <p class="mt-4 max-w-sm text-white/75">
-            Berita, pengumuman, galeri kegiatan, dan profil desa — semua dapat diperbarui
+            Berita, pengumuman, galeri kegiatan, dan profil kelurahan — semua dapat diperbarui
             dengan cepat dan aman.
           </p>
         </div>
@@ -88,7 +88,7 @@ useHead({ title: 'Masuk Admin' })
         <p class="mt-1.5 text-sm text-ink-muted">Gunakan akun administrator Anda.</p>
 
         <form class="mt-8 space-y-4" @submit.prevent="submit">
-          <UiInput v-model="email" label="Email" type="email" placeholder="admin@desa.id" required />
+          <UiInput v-model="email" label="Email" type="email" placeholder="admin@kelurahan.id" required />
 
           <label class="block">
             <span class="mb-1.5 block text-sm font-medium text-ink">Kata sandi</span>
