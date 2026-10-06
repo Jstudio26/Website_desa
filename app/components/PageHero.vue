@@ -16,7 +16,7 @@ const { settings } = useSettings()
     <div class="pattern-flag absolute inset-0 opacity-60" />
     <div class="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
-    <div class="container-app relative pb-16 pt-28 sm:pb-20 sm:pt-32">
+    <div v-reveal class="container-app relative pb-16 pt-28 sm:pb-20 sm:pt-32">
       <nav v-if="breadcrumb?.length" class="mb-4 flex flex-wrap items-center gap-1.5 text-xs text-white/60">
         <NuxtLink to="/" class="transition hover:text-white">Beranda</NuxtLink>
         <template v-for="(b, i) in breadcrumb" :key="i">

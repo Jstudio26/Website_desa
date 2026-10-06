@@ -10,10 +10,13 @@ const links = [
   { label: 'Galeri', to: '/admin/galeri', icon: 'gallery' },
   { label: 'Organisasi', to: '/admin/organisasi', icon: 'users' },
   { label: 'Peta Wilayah', to: '/admin/peta', icon: 'mapPin' },
+  { label: 'Landmark & Fasilitas', to: '/admin/landmark', icon: 'compass' },
+  { label: 'Potensi Kelurahan', to: '/admin/potensi', icon: 'leaf' },
   { label: 'Layanan Surat', to: '/admin/layanan-surat', icon: 'fileText' },
   { label: 'Pengaduan', to: '/admin/pengaduan', icon: 'shield' },
   { label: 'Profil Kelurahan', to: '/admin/profil', icon: 'home' },
   { label: 'Pesan Masuk', to: '/admin/pesan', icon: 'inbox' },
+  { label: 'Posko KKT', to: '/admin/posko', icon: 'graduation' },
 ]
 
 const isActive = (to: string) => (to === '/admin' ? route.path === '/admin' : route.path.startsWith(to))

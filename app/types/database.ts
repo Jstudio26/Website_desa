@@ -4,6 +4,45 @@
  * `Record<string, unknown>` table constraint.
  */
 
+export type PotensiCategory = 'sdm' | 'sda'
+export type PotensiItem = {
+  id: string
+  category: PotensiCategory
+  title: string
+  description: string
+  imageUrl: string
+}
+
+/** One person in the posko structure. `detail` = prodi/fakultas for students, NIP/unit for staff. */
+/** Kekuatan & kelemahan satu aspek (SDM atau SDA). `overview`: paragraf dipisah baris kosong. */
+export type PotensiAspect = { overview: string, strengths: string[], weaknesses: string[] }
+export type PotensiProfile = {
+  summary: string
+  /** Angka kunci di bawah ringkasan, mis. { value: '2.207', label: 'Jiwa penduduk' }. */
+  highlights: { value: string, label: string }[]
+  sdm: PotensiAspect
+  sda: PotensiAspect
+  /** Bagian tambahan sesudah SDM & SDA (mis. potensi wilayah sebagai pendukung). */
+  support: { title: string, text: string }
+  recommendations: string[]
+  recommendationsNote: string
+  /** Satu sumber per baris. */
+  sources: string
+}
+
+export type PoskoPerson = { id: string, name: string, detail: string, photoUrl: string }
+export type ProgramStatus = 'rencana' | 'berjalan' | 'selesai'
+export type PoskoProgram = { id: string, title: string, description: string, status: ProgramStatus }
+export type PoskoInfo = {
+  title: string
+  university: string
+  period: string
+  intro: string
+  /** People per position, key = POSKO_POSITIONS[].key (config/posko.ts). */
+  structure: Partial<Record<string, PoskoPerson[]>>
+  programs: PoskoProgram[]
+}
+
 export type SettingsData = {
   villageName: string
   tagline: string
@@ -32,6 +71,8 @@ export type SettingsData = {
     tiktok: string
   }
   demographics: {
+    male: number | null
+    female: number | null
     balita0_11: number | null
     balita1_2: number | null
     balita2_3: number | null
@@ -42,12 +83,53 @@ export type SettingsData = {
     lansia70_79: number | null
     lansia80Plus: number | null
   }
+  /** Jumlah penduduk per kelompok umur 5 tahunan, key = AGE_BANDS (config/penduduk.ts). */
+  ageDistribution: Partial<Record<string, { male: number | null, female: number | null }>>
+  /** Halaman Potensi Kelurahan (SDM & SDA): kartu potensi unggulan… */
+  potensi: PotensiItem[]
+  /** …dan uraian kajiannya (ringkasan, kekuatan/kelemahan, rekomendasi). */
+  potensiProfile: PotensiProfile
+  /** Halaman Posko KKT. */
+  posko: PoskoInfo
   mapCenter: {
     lat: number | null
     lng: number | null
     zoom: number
   }
+  /** Jam pelayanan kantor, satu baris per hari/rentang (mis. "Senin–Jumat: 08.00–15.00"). */
+  officeHours: string
+  /** Jenis surat di halaman Layanan Surat beserta persyaratannya (diatur admin). */
+  letterTypes: LetterTypeConfig[]
 }
+
+export type LetterTypeConfig = {
+  name: string
+  /** Satu persyaratan per baris. */
+  requirements: string
+  /** Perkiraan lama proses, mis. "1 hari kerja". Kosong = tidak ditampilkan. */
+  duration: string
+}
+
+/** Hasil fungsi database cek_status(kode). */
+export type TicketStatus =
+  | {
+    kind: 'surat'
+    code: string
+    title: string
+    status: LetterRequestStatus
+    created_at: string
+    updated_at: string
+    events: { status: LetterRequestStatus, note: string | null, at: string }[]
+  }
+  | {
+    kind: 'pengaduan'
+    code: string
+    title: string
+    status: ComplaintStatus
+    response: string | null
+    created_at: string
+    updated_at: string
+  }
 
 export type Official = {
   id: string
@@ -144,13 +226,29 @@ export type NeighborhoodRt = {
   display_order: number
 }
 
+/** Titik landmark / fasilitas publik. `category` = value di config/landmark.ts. */
+export type Landmark = {
+  id: string
+  name: string
+  category: string
+  description: string | null
+  address: string | null
+  photo_url: string | null
+  lat: number
+  lng: number
+  created_at: string
+}
+
 export type LetterRequestStatus = 'diajukan' | 'diproses' | 'selesai' | 'ditolak'
 
 export type LetterRequest = {
   id: string
+  /** Kode tiket untuk cek status, mis. SR-4F09A2C1. */
+  code: string
   type: string
   name: string
-  nik: string
+  /** Tidak lagi dikumpulkan; hanya ada pada permohonan lama. */
+  nik: string | null
   phone: string
   address: string | null
   purpose: string | null
@@ -160,10 +258,21 @@ export type LetterRequest = {
   updated_at: string
 }
 
+/** Riwayat status permohonan, dicatat otomatis oleh trigger database. */
+export type LetterRequestEvent = {
+  id: number
+  request_id: string
+  status: LetterRequestStatus
+  note: string | null
+  created_at: string
+}
+
 export type ComplaintStatus = 'diterima' | 'diproses' | 'selesai'
 
 export type Complaint = {
   id: string
+  /** Kode tiket untuk cek status, mis. PG-4F09A2C1. */
+  code: string
   name: string
   phone: string | null
   category: string

@@ -57,7 +57,7 @@ const socials = computed(() => {
         </div>
 
         <div v-for="col in FOOTER_COLUMNS" :key="col.title">
-          <h3 class="text-sm font-bold uppercase tracking-wide text-white">{{ col.title }}</h3>
+          <h2 class="text-sm font-bold uppercase tracking-wide text-white">{{ col.title }}</h2>
           <ul class="mt-4 space-y-2.5 text-sm">
             <li v-for="l in col.links" :key="l.url">
               <NuxtLink :to="l.url" class="link-underline transition hover:text-white">{{ l.label }}</NuxtLink>

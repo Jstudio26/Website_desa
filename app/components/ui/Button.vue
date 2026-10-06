@@ -13,6 +13,8 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   size: 'md',
   type: 'button',
+  to: undefined,
+  href: undefined,
 })
 
 const classes = computed(() => {

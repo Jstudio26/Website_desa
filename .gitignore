@@ -24,3 +24,8 @@ npm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 Thumbs.db
+
+# Data peta mentah (sumber import, bukan bagian dari app)
+*.geojson
+*.zip
+/Batas Kelurahan Kota Tomohon/

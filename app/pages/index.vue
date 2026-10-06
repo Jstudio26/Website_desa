@@ -34,7 +34,7 @@ const facts = computed(() => {
   return [
     { icon: 'users', label: 'Jumlah Penduduk', value: s.population },
     { icon: 'home', label: 'Kepala Keluarga', value: s.households },
-    { icon: 'mapPin', label: 'Jumlah Dusun', value: s.hamlets },
+    { icon: 'mapPin', label: 'Jumlah Lingkungan', value: s.hamlets },
     { icon: 'compass', label: 'Luas Wilayah', value: s.areaKm2, suffix: ' km²' },
   ].filter((f) => f.value != null)
 })
@@ -87,7 +87,7 @@ useHead(() => ({
     </section>
 
     <!-- ---------------- Quick facts ---------------- -->
-    <div v-if="facts.length" class="container-app relative z-10 -mt-14 sm:-mt-16">
+    <div v-if="facts.length" v-reveal class="container-app relative z-10 -mt-14 sm:-mt-16">
       <div class="grid grid-cols-2 divide-line overflow-hidden rounded-theme border border-line/80 bg-surface shadow-card md:grid-cols-4 md:divide-x">
         <div v-for="f in facts" :key="f.label" class="flex items-center gap-3.5 p-5">
           <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
@@ -106,7 +106,7 @@ useHead(() => ({
     <!-- ---------------- Intro + Pengumuman ---------------- -->
     <section class="section container-app">
       <div class="grid gap-10 lg:grid-cols-[1.5fr_1fr]">
-        <div>
+        <div v-reveal>
           <span class="eyebrow"><span class="h-px w-6 bg-primary" /> Selamat Datang</span>
           <h2 class="mt-4 text-fluid-h3 font-extrabold">
             Portal resmi warga {{ settings.villageName }}
@@ -118,7 +118,7 @@ useHead(() => ({
           </UiButton>
         </div>
 
-        <div class="accent-top rounded-theme border border-line/80 bg-surface p-6 shadow-card">
+        <div v-reveal="1" class="accent-top rounded-theme border border-line/80 bg-surface p-6 shadow-card">
           <div class="flex items-center gap-2.5">
             <span class="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
               <AppIcon name="megaphone" :size="17" />
@@ -147,7 +147,7 @@ useHead(() => ({
     <!-- ---------------- Berita ---------------- -->
     <section class="section bg-surface-muted/50">
       <div class="container-app">
-        <div class="flex flex-wrap items-end justify-between gap-4">
+        <div v-reveal class="flex flex-wrap items-end justify-between gap-4">
           <div>
             <span class="eyebrow"><span class="h-px w-6 bg-primary" /> Informasi</span>
             <h2 class="mt-4 text-fluid-h3 font-extrabold">Berita Terkini</h2>
@@ -159,8 +159,9 @@ useHead(() => ({
 
         <div v-if="data?.berita.length" class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <NuxtLink
-            v-for="b in data.berita"
+            v-for="(b, i) in data.berita"
             :key="b.id"
+            v-reveal="i"
             :to="`/berita/${b.slug}`"
             class="card card-hover group flex flex-col overflow-hidden"
           >
@@ -196,7 +197,7 @@ useHead(() => ({
 
     <!-- ---------------- Galeri ---------------- -->
     <section v-if="data?.galeri.length" class="section container-app">
-      <div class="flex flex-wrap items-end justify-between gap-4">
+      <div v-reveal class="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span class="eyebrow"><span class="h-px w-6 bg-primary" /> Dokumentasi</span>
           <h2 class="mt-4 text-fluid-h3 font-extrabold">Galeri Kegiatan</h2>
@@ -209,6 +210,7 @@ useHead(() => ({
         <NuxtLink
           v-for="(g, i) in data.galeri"
           :key="g.id"
+          v-reveal="i"
           to="/galeri"
           class="group relative overflow-hidden rounded-xl bg-surface-muted"
           :class="i === 0 ? 'col-span-2 row-span-2 aspect-square sm:aspect-auto' : 'aspect-square'"
@@ -222,7 +224,7 @@ useHead(() => ({
     <!-- ---------------- CTA ---------------- -->
     <section class="pb-20 sm:pb-28">
       <div class="container-app">
-        <div class="grain relative overflow-hidden rounded-theme bg-primary px-6 py-14 text-center text-white sm:px-12">
+        <div v-reveal class="grain relative overflow-hidden rounded-theme bg-primary px-6 py-14 text-center text-white sm:px-12">
           <div class="pattern-flag absolute inset-0 opacity-80" />
           <div class="absolute -right-10 -top-10 h-52 w-52 rounded-full bg-white/10 blur-2xl" />
           <div class="relative mx-auto max-w-xl">

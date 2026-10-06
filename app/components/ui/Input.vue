@@ -7,6 +7,8 @@ defineProps<{
   placeholder?: string
   required?: boolean
   disabled?: boolean
+  autocomplete?: string
+  inputmode?: 'text' | 'tel' | 'email' | 'numeric' | 'decimal' | 'search' | 'url'
 }>()
 const model = defineModel<string | number | null>()
 </script>
@@ -22,6 +24,9 @@ const model = defineModel<string | number | null>()
       :placeholder="placeholder"
       :required="required"
       :disabled="disabled"
+      :autocomplete="autocomplete"
+      :inputmode="inputmode"
+      :aria-invalid="error && error.length ? true : undefined"
       class="w-full rounded-theme border border-line bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-muted/60 focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
       :class="error && error.length ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : ''"
     >

@@ -18,7 +18,7 @@ const is404 = computed(() => props.error?.statusCode === 404)
       <p class="mt-3 text-ink-muted">
         {{ is404
           ? 'Halaman yang Anda cari mungkin telah dipindahkan atau tidak tersedia.'
-          : (error?.message || 'Silakan coba beberapa saat lagi.') }}
+          : 'Silakan muat ulang halaman atau coba beberapa saat lagi.' }}
       </p>
       <button
         class="mt-8 inline-flex items-center gap-2 rounded-theme bg-primary px-6 py-3 font-semibold text-white shadow-red transition hover:bg-primary-deep"

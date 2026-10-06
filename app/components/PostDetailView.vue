@@ -15,16 +15,19 @@ if (!data.value?.post) {
 const post = computed(() => data.value!.post!)
 const related = computed(() => data.value?.related ?? [])
 
-const { public: pub } = useRuntimeConfig()
+// Same `key`s as app.vue, so these replace the site-wide tags instead of duplicating them.
 useHead(() => ({
   title: post.value.title,
   meta: [
-    { name: 'description', content: post.value.excerpt || '' },
+    ...(post.value.excerpt
+      ? [
+          { name: 'description', content: post.value.excerpt },
+          { property: 'og:description', content: post.value.excerpt, key: 'og:description' },
+        ]
+      : []),
     { property: 'og:title', content: post.value.title },
-    { property: 'og:description', content: post.value.excerpt || '' },
-    { property: 'og:image', content: post.value.cover_url || '' },
-    { property: 'og:type', content: 'article' },
-    { property: 'og:url', content: `${pub.siteUrl}/${props.type}/${post.value.slug}` },
+    ...(post.value.cover_url ? [{ property: 'og:image', content: post.value.cover_url, key: 'og:image' }] : []),
+    { property: 'og:type', content: 'article', key: 'og:type' },
   ],
 }))
 </script>
@@ -73,11 +76,12 @@ useHead(() => ({
 
     <section v-if="related.length" class="section bg-surface-muted/50">
       <div class="container-app">
-        <h2 class="font-heading text-xl font-extrabold">{{ label }} Lainnya</h2>
+        <h2 v-reveal class="font-heading text-xl font-extrabold">{{ label }} Lainnya</h2>
         <div class="mt-6 grid gap-6 sm:grid-cols-3">
           <NuxtLink
-            v-for="r in related"
+            v-for="(r, i) in related"
             :key="r.id"
+            v-reveal="i + 1"
             :to="`/${type}/${r.slug}`"
             class="card card-hover group overflow-hidden"
           >

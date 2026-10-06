@@ -11,7 +11,8 @@ const { data: groups } = await useAsyncData('organisasi', async () => {
     .select('*, community_group_members(*)')
     .order('display_order', { ascending: true })
     .order('display_order', { ascending: true, foreignTable: 'community_group_members' })
-  return (data ?? []) as CommunityGroupWithMembers[]
+  // Relasi tidak dideklarasikan di tipe Database minimal, jadi hasil join di-cast manual.
+  return (data ?? []) as unknown as CommunityGroupWithMembers[]
 })
 
 const categories = computed(() => {
@@ -53,11 +54,13 @@ useHead({ title: 'Organisasi Kemasyarakatan' })
 
     <section v-if="categories.length" class="section container-app space-y-16">
       <div v-for="c in categories" :key="c.category">
-        <span class="eyebrow"><span class="h-px w-6 bg-primary" /> {{ c.category }}</span>
-        <h2 class="mt-4 font-heading text-2xl font-extrabold">{{ c.category }}</h2>
+        <div v-reveal>
+          <span class="eyebrow"><span class="h-px w-6 bg-primary" /> {{ c.category }}</span>
+          <h2 class="mt-4 font-heading text-2xl font-extrabold">{{ c.category }}</h2>
+        </div>
 
         <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div v-for="g in c.groups" :key="g.id" class="card p-5">
+          <div v-for="(g, i) in c.groups" :key="g.id" v-reveal="i % 3" class="card p-5">
             <h3 class="font-heading text-lg font-bold text-ink">{{ g.name }}</h3>
             <p v-if="g.description" class="mt-1.5 text-sm text-ink-muted">{{ g.description }}</p>
 

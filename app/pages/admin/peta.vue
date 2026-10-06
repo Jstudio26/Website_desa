@@ -4,12 +4,81 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import type { Database } from '~/types/supabase'
 import type { Neighborhood, NeighborhoodBoundary, NeighborhoodRt, SettingsData } from '~/types/database'
 import { DEFAULT_SETTINGS } from '~/composables/useSettings'
+import type { ImportCandidate } from '~/utils/geoImport'
 
 definePageMeta({ layout: 'admin' })
 
 const supabase = useSupabaseClient<Database>()
 const toast = useToast()
 const { settings, refresh: refreshSettings } = useSettings()
+
+// ---- Import batas dari GeoJSON / SHP (.zip) ----------------------------
+// File sumber biasanya berisi banyak wilayah (mis. semua kelurahan se-kota), jadi admin
+// memilih dulu poligon mana yang benar-benar lingkungan sebelum disimpan.
+// Parsing ada di utils/geoImport.ts.
+const shpInput = ref<HTMLInputElement | null>(null)
+const importingShp = ref(false)
+const importModalOpen = ref(false)
+const importCandidates = ref<ImportCandidate[]>([])
+const importSearch = ref('')
+const savingImport = ref(false)
+
+const filteredCandidates = computed(() => {
+  const q = importSearch.value.trim().toLowerCase()
+  return q ? importCandidates.value.filter(c => c.name.toLowerCase().includes(q)) : importCandidates.value
+})
+const selectedCandidates = computed(() => importCandidates.value.filter(c => c.selected))
+
+async function onShpImport(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  importingShp.value = true
+  try {
+    const parsed = await readBoundaryFile(file)
+    importCandidates.value = extractCandidates(parsed, (neighborhoods.value ?? []).map(n => n.name))
+    importSearch.value = ''
+    importModalOpen.value = true
+  }
+  catch (err) {
+    toast.error('Gagal membaca file', err instanceof Error ? err.message : '')
+  }
+  finally {
+    importingShp.value = false
+    if (shpInput.value) shpInput.value.value = ''
+  }
+}
+
+async function confirmImport() {
+  const picked = selectedCandidates.value
+  if (!picked.length) return
+  savingImport.value = true
+  try {
+    const startOrder = neighborhoods.value?.length ?? 0
+    const rows = picked.map((c, i) => {
+      const center = boundaryCenter(c.boundary)
+      return {
+        name: c.name,
+        boundary: c.boundary,
+        center_lat: center?.lat ?? null,
+        center_lng: center?.lng ?? null,
+        display_order: startOrder + i,
+      }
+    })
+    // Satu insert untuk semua baris: berhasil semua atau gagal semua.
+    const { error } = await supabase.from('neighborhoods').insert(rows)
+    if (error) throw error
+    toast.success(`${rows.length} lingkungan diimpor`)
+    importModalOpen.value = false
+    importCandidates.value = []
+    refreshNeighborhoods()
+  }
+  catch (err) {
+    toast.error('Gagal mengimpor', err instanceof Error ? err.message : '')
+  }
+  finally {
+    savingImport.value = false
+  }
+}
 
 // ---- Neighborhoods list ----------------------------------------------
 const { data: neighborhoods, refresh: refreshNeighborhoods } = await useAsyncData('admin-neighborhoods', async () => {
@@ -136,7 +205,7 @@ async function initDrawMap(n: Neighborhood) {
 
   const center = settings.value.mapCenter
   drawMap = L.map(drawMapEl.value).setView([center.lat ?? -1.5, center.lng ?? 124.8], center.zoom || 15)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19,
   }).addTo(drawMap)
@@ -311,6 +380,11 @@ useHead({ title: 'Peta Wilayah' })
   <div>
     <AdminPageHeader title="Peta Wilayah" description="Kelola lingkungan dan gambar batas wilayahnya.">
       <template #actions>
+        <UiButton size="sm" variant="outline" :loading="importingShp" @click="shpInput?.click()">
+          <template #icon><AppIcon name="upload" :size="14" /></template> Import Peta
+        </UiButton>
+        <input ref="shpInput" type="file" accept=".zip,.geojson,.json" class="hidden" @change="onShpImport">
+
         <UiButton size="sm" @click="newNeighborhood">
           <template #icon><AppIcon name="plus" :size="14" /></template> Tambah Lingkungan
         </UiButton>
@@ -392,6 +466,40 @@ useHead({ title: 'Peta Wilayah' })
       @update:open="confirmId = null"
       @confirm="removeNeighborhood"
     />
+
+    <!-- Modal: pilih wilayah yang diimpor -->
+    <UiModal v-model:open="importModalOpen" title="Import Batas Wilayah" size="lg">
+      <p class="text-sm text-ink-muted">
+        File berisi {{ importCandidates.length }} wilayah. Centang hanya yang merupakan lingkungan di kelurahan ini.
+      </p>
+      <div class="mt-3">
+        <UiInput v-model="importSearch" placeholder="Cari nama wilayah…" />
+      </div>
+      <div class="mt-3 divide-y divide-line rounded-theme border border-line">
+        <label
+          v-for="c in filteredCandidates"
+          :key="c.key"
+          class="flex items-center gap-3 px-3 py-2.5 text-sm"
+          :class="c.blocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-surface-muted'"
+        >
+          <input v-model="c.selected" type="checkbox" class="h-4 w-4 accent-primary" :disabled="!!c.blocked">
+          <span class="flex-1 truncate text-ink">{{ c.name }}</span>
+          <span v-if="c.blocked" class="text-xs text-ink-muted">{{ c.blocked === 'exists' ? 'Sudah ada' : 'Nama ganda di file' }}</span>
+        </label>
+        <p v-if="!filteredCandidates.length" class="px-3 py-4 text-sm text-ink-muted">Tidak ada wilayah yang cocok.</p>
+      </div>
+      <template #footer>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-sm text-ink-muted">{{ selectedCandidates.length }} dipilih</span>
+          <div class="flex gap-2">
+            <UiButton variant="ghost" size="sm" @click="importModalOpen = false">Batal</UiButton>
+            <UiButton size="sm" :loading="savingImport" :disabled="!selectedCandidates.length" @click="confirmImport">
+              Impor {{ selectedCandidates.length || '' }} Wilayah
+            </UiButton>
+          </div>
+        </div>
+      </template>
+    </UiModal>
 
     <!-- Modal: gambar batas wilayah -->
     <UiModal v-model:open="drawModalOpen" :title="drawTarget ? `Gambar Batas — ${drawTarget.name}` : 'Gambar Batas'" size="xl">

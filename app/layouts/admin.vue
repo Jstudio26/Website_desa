@@ -1,14 +1,29 @@
 <script setup lang="ts">
 import { SITE_LOCALE } from '~/config/site'
+import type { Database } from '~/types/supabase'
 
 const sidebarOpen = ref(false)
-const supabase = useSupabaseClient()
+const supabase = useSupabaseClient<Database>()
 const user = useSupabaseUser()
 const router = useRouter()
 
 const today = new Intl.DateTimeFormat(SITE_LOCALE, {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
 }).format(new Date())
+
+// Login saja tidak cukup: hanya email di tabel `admins` yang diizinkan database (lihat schema.sql).
+// Ini hanya tampilan; aturan sebenarnya ada di RLS. Bila fungsi is_admin belum ada (skema lama),
+// panel tetap ditampilkan seperti sebelumnya.
+const { data: isAdmin } = useAsyncData('is-admin', async () => {
+  if (!user.value) return true
+  const { data, error } = await supabase.rpc('is_admin')
+  return error ? true : data === true
+}, { server: false, watch: [user] })
+// Panel admin jangan sampai muncul di hasil pencarian.
+useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
+
+const grantSql = computed(() =>
+  `insert into public.admins (email) values ('${user.value?.email ?? 'email@anda.com'}') on conflict do nothing;`)
 
 async function doLogout() {
   await supabase.auth.signOut()
@@ -46,7 +61,24 @@ async function doLogout() {
       </header>
 
       <main class="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
-        <slot />
+        <div v-if="isAdmin === false" class="mx-auto max-w-xl rounded-theme border border-line bg-surface p-6 sm:p-8">
+          <span class="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
+            <AppIcon name="shield" :size="22" />
+          </span>
+          <h1 class="mt-4 font-heading text-xl font-bold">Akun ini belum terdaftar sebagai admin</h1>
+          <p class="mt-2 text-sm text-ink-muted">
+            Anda masuk sebagai <strong class="text-ink">{{ user?.email }}</strong>, tetapi email ini belum ada di daftar admin,
+            sehingga tidak bisa mengelola konten atau melihat data warga.
+          </p>
+          <p class="mt-4 text-sm text-ink-muted">
+            Bila ini memang akun pengelola, jalankan perintah berikut di Supabase → SQL Editor, lalu muat ulang halaman:
+          </p>
+          <pre class="mt-2 overflow-x-auto rounded-theme bg-surface-muted p-3 text-xs text-ink">{{ grantSql }}</pre>
+          <UiButton class="mt-5" variant="outline" size="sm" @click="doLogout">
+            <template #icon><AppIcon name="logout" :size="14" /></template> Keluar
+          </UiButton>
+        </div>
+        <slot v-else />
       </main>
     </div>
 

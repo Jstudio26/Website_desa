@@ -16,6 +16,18 @@ const openDropdown = ref<string | null>(null)
 watch(() => route.fullPath, () => { mobileOpen.value = false; openDropdown.value = null })
 
 const isActive = (url: string) => (url === '/' ? route.path === '/' : route.path.startsWith(url))
+const NuxtLink = resolveComponent('NuxtLink')
+const hovered = ref<string | null>(null)
+/** Click/tap/Enter. While the pointer is over the item (incl. emulated hover on touch) keep it open. */
+function toggleDropdown(id: string) {
+  openDropdown.value = hovered.value === id || openDropdown.value !== id ? id : null
+}
+/** Close a submenu once keyboard focus leaves it. */
+function onGroupFocusOut(e: FocusEvent, id: string) {
+  const next = e.relatedTarget as Node | null
+  if (openDropdown.value === id && !(e.currentTarget as HTMLElement).contains(next)) openDropdown.value = null
+}
+
 const isActiveGroup = (item: (typeof navigation)[number]) =>
   item.children.length ? item.children.some((c) => isActive(c.url)) : isActive(item.url)
 </script>
@@ -59,12 +71,18 @@ const isActiveGroup = (item: (typeof navigation)[number]) =>
             v-for="item in navigation"
             :key="item.id"
             class="relative"
-            @mouseenter="item.children.length && (openDropdown = item.id)"
-            @mouseleave="item.children.length && (openDropdown = null)"
+            @mouseenter="item.children.length && (hovered = openDropdown = item.id)"
+            @mouseleave="item.children.length && (hovered = openDropdown = null)"
+            @focusout="onGroupFocusOut($event, item.id)"
+            @keydown.esc="openDropdown = null"
           >
-            <NuxtLink
-              :to="item.url"
-              class="group/nav relative flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold transition"
+            <!-- Menu induk = tombol (bukan link): di layar sentuh ketukan pertama membuka submenu. -->
+            <component
+              :is="item.children.length ? 'button' : NuxtLink"
+              v-bind="item.children.length
+                ? { type: 'button', 'aria-expanded': openDropdown === item.id, 'aria-haspopup': 'true', onClick: () => toggleDropdown(item.id) }
+                : { to: item.url }"
+              class="group/nav relative flex items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-semibold transition xl:px-3"
               :class="[
                 solid ? 'text-ink hover:text-primary' : 'text-white/90 hover:text-white',
                 isActiveGroup(item) && (solid ? '!text-primary' : '!text-white'),
@@ -73,10 +91,10 @@ const isActiveGroup = (item: (typeof navigation)[number]) =>
               {{ item.label }}
               <AppIcon v-if="item.children.length" name="chevronDown" :size="13" />
               <span
-                class="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-primary transition-all duration-300"
+                class="absolute inset-x-2.5 -bottom-0.5 h-[2px] xl:inset-x-3 rounded-full bg-primary transition-all duration-300"
                 :class="isActiveGroup(item) ? 'opacity-100' : 'opacity-0 scale-x-0 group-hover/nav:opacity-40 group-hover/nav:scale-x-100'"
               />
-            </NuxtLink>
+            </component>
 
             <Transition name="fade">
               <div

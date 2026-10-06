@@ -1,5 +1,5 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ color?: string, tone?: 'solid' | 'soft' }>(), { tone: 'soft' })
+withDefaults(defineProps<{ color?: string, tone?: 'solid' | 'soft' }>(), { color: undefined, tone: 'soft' })
 </script>
 
 <template>

@@ -11,6 +11,7 @@ const sent = ref(false)
 
 const info = computed(() => [
   { icon: 'mapPin', label: 'Alamat', value: settings.value.address },
+  { icon: 'clock', label: 'Jam Pelayanan', value: settings.value.officeHours.trim() },
   { icon: 'phone', label: 'Telepon', value: settings.value.phone, href: `tel:${settings.value.phone}` },
   { icon: 'mail', label: 'Email', value: settings.value.email, href: `mailto:${settings.value.email}` },
   {
@@ -32,11 +33,11 @@ async function submit() {
   if (!validate()) return
   sending.value = true
   try {
-    const { error } = await supabase.from('messages').insert({
-      name: form.name.trim(),
-      email: form.email.trim() || null,
-      phone: form.phone.trim() || null,
-      message: form.message.trim(),
+    const { error } = await supabase.rpc('kirim_pesan', {
+      p_name: form.name.trim(),
+      p_message: form.message.trim(),
+      p_email: form.email.trim() || null,
+      p_phone: form.phone.trim() || null,
     })
     if (error) throw error
     sent.value = true
@@ -64,7 +65,7 @@ useHead({ title: 'Kontak' })
 
     <div class="section container-app grid gap-10 lg:grid-cols-2">
       <!-- Info + map -->
-      <div>
+      <div v-reveal>
         <span class="eyebrow"><span class="h-px w-6 bg-primary" /> Kontak</span>
         <h2 class="mt-4 font-heading text-2xl font-extrabold">Informasi Kontak</h2>
         <ul class="mt-6 space-y-3">
@@ -75,7 +76,7 @@ useHead({ title: 'Kontak' })
             <div class="min-w-0">
               <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ i.label }}</p>
               <a v-if="i.href" :href="i.href" class="break-words font-semibold text-ink transition hover:text-primary">{{ i.value }}</a>
-              <p v-else class="font-semibold text-ink">{{ i.value }}</p>
+              <p v-else class="whitespace-pre-line font-semibold text-ink">{{ i.value }}</p>
             </div>
           </li>
         </ul>
@@ -86,7 +87,7 @@ useHead({ title: 'Kontak' })
       </div>
 
       <!-- Form -->
-      <div class="accent-top rounded-theme border border-line/80 bg-surface p-6 shadow-card sm:p-8">
+      <div v-reveal="1" class="accent-top rounded-theme border border-line/80 bg-surface p-6 shadow-card sm:p-8">
         <h2 class="font-heading text-2xl font-extrabold">Kirim Pesan</h2>
         <p class="mt-1.5 text-sm text-ink-muted">Isi formulir di bawah, kami akan menindaklanjuti.</p>
         <form class="mt-6 space-y-4" @submit.prevent="submit">
@@ -96,6 +97,11 @@ useHead({ title: 'Kontak' })
             <UiInput v-model="form.phone" label="Telepon / WA" :error="errors.phone" placeholder="opsional" />
           </div>
           <UiTextarea v-model="form.message" label="Pesan" required :rows="6" :error="errors.message" placeholder="Tulis pesan Anda…" />
+          <p class="text-xs text-ink-muted">
+            Isi email atau nomor WA bila ingin dibalas. Untuk permohonan surat atau laporan masalah, gunakan
+            <NuxtLink to="/layanan-surat" class="font-medium text-primary hover:underline">Layanan Surat</NuxtLink> atau
+            <NuxtLink to="/pengaduan" class="font-medium text-primary hover:underline">Pengaduan</NuxtLink> agar bisa dilacak.
+          </p>
           <UiButton type="submit" :loading="sending" block size="lg">Kirim Pesan</UiButton>
           <p v-if="sent" class="flex items-center gap-2 text-sm font-medium text-primary">
             <AppIcon name="check" :size="16" /> Pesan Anda sudah terkirim. Terima kasih!

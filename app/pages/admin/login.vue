@@ -40,7 +40,7 @@ async function submit() {
   }
 }
 
-useHead({ title: 'Masuk Admin' })
+useHead({ title: 'Masuk Admin', meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 </script>
 
 <template>

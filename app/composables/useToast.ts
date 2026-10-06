@@ -1,6 +1,6 @@
 export interface ToastItem {
   id: number
-  type: 'success' | 'error' | 'info' | 'warning'
+  type: 'success' | 'error'
   title: string
   message?: string
 }
@@ -22,7 +22,5 @@ export function useToast() {
     dismiss,
     success: (t: string, m?: string) => push('success', t, m),
     error: (t: string, m?: string) => push('error', t, m),
-    info: (t: string, m?: string) => push('info', t, m),
-    warning: (t: string, m?: string) => push('warning', t, m),
   }
 }

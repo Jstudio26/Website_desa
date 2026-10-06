@@ -1,5 +1,5 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ lines?: number, class?: string }>(), { lines: 1 })
+withDefaults(defineProps<{ lines?: number, class?: string }>(), { lines: 1, class: undefined })
 </script>
 
 <template>

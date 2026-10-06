@@ -21,3 +21,9 @@ export function formatNumber(value?: number | null): string {
   if (value == null) return '—'
   return new Intl.NumberFormat(SITE_LOCALE).format(value)
 }
+
+/** Date + time, e.g. "6 Okt 2026, 09.31" — for status history. */
+export function formatDateTime(value?: string | null): string {
+  if (!value) return '—'
+  return new Intl.DateTimeFormat(SITE_LOCALE, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+}

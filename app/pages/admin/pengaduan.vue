@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Database } from '~/types/supabase'
 import type { Complaint, ComplaintStatus } from '~/types/database'
+import { COMPLAINT_STATUS } from '~/config/layanan'
 import { formatDate } from '~/utils/format'
 
 definePageMeta({ layout: 'admin' })
@@ -15,17 +16,7 @@ const { data: items, pending, refresh } = await useAsyncData('admin-pengaduan', 
   return (data ?? []) as Complaint[]
 })
 
-const STATUS_LABEL: Record<ComplaintStatus, string> = {
-  diterima: 'Diterima',
-  diproses: 'Diproses',
-  selesai: 'Selesai',
-}
-const STATUS_COLOR: Record<ComplaintStatus, string> = {
-  diterima: '#D97706',
-  diproses: '#2563EB',
-  selesai: '#16A34A',
-}
-const STATUS_OPTIONS = (Object.keys(STATUS_LABEL) as ComplaintStatus[]).map((s) => ({ label: STATUS_LABEL[s], value: s }))
+const STATUS_OPTIONS = (Object.keys(COMPLAINT_STATUS) as ComplaintStatus[]).map((s) => ({ label: COMPLAINT_STATUS[s].label, value: s }))
 
 const filter = ref<'semua' | ComplaintStatus>('semua')
 const filtered = computed(() => {
@@ -114,9 +105,11 @@ useHead({ title: 'Pengaduan Masyarakat' })
               <span class="font-normal text-ink-muted">· {{ formatDate(item.created_at, 'long') }}</span>
             </p>
             <p class="mt-0.5 line-clamp-1 text-sm text-ink-muted">{{ item.category }}<span v-if="item.location"> · {{ item.location }}</span></p>
-            <p class="mt-0.5 line-clamp-1 text-xs text-ink-muted">{{ item.description }}</p>
+            <p class="mt-0.5 line-clamp-1 text-xs text-ink-muted">
+              <span class="font-mono font-semibold text-ink">{{ item.code }}</span> · {{ item.description }}
+            </p>
           </button>
-          <UiBadge :color="STATUS_COLOR[item.status]">{{ STATUS_LABEL[item.status] }}</UiBadge>
+          <StatusBadge :meta="COMPLAINT_STATUS[item.status]" />
           <button class="p-1.5 text-ink-muted hover:text-red-500" @click="confirmId = item.id">
             <AppIcon name="trash" :size="15" />
           </button>
@@ -130,6 +123,7 @@ useHead({ title: 'Pengaduan Masyarakat' })
       <div v-if="active" class="space-y-4 text-sm">
         <img v-if="active.photo_url" :src="active.photo_url" alt="" class="max-h-52 w-full rounded-theme object-contain">
         <div class="space-y-1.5 rounded-theme bg-surface-muted/50 p-4">
+          <p><span class="text-ink-muted">Kode:</span> <span class="font-mono font-semibold text-ink">{{ active.code }}</span></p>
           <p><span class="text-ink-muted">Kategori:</span> <span class="font-medium text-ink">{{ active.category }}</span></p>
           <p v-if="active.location"><span class="text-ink-muted">Lokasi:</span> <span class="font-medium text-ink">{{ active.location }}</span></p>
           <p v-if="active.phone"><span class="text-ink-muted">Telepon:</span> <a :href="`tel:${active.phone}`" class="font-medium text-primary hover:underline">{{ active.phone }}</a></p>
@@ -138,7 +132,13 @@ useHead({ title: 'Pengaduan Masyarakat' })
         </div>
 
         <UiSelect v-model="editForm.status" label="Status" :options="STATUS_OPTIONS" />
-        <UiTextarea v-model="editForm.response" label="Tanggapan Admin" :rows="3" placeholder="Opsional, mis. tindak lanjut yang sudah dilakukan." />
+        <UiTextarea
+          v-model="editForm.response"
+          label="Tanggapan untuk pelapor"
+          :rows="3"
+          hint="Terlihat oleh pelapor saat cek status dengan kode tiket."
+          placeholder="Mis. Lampu jalan sudah diperbaiki pada 12 Oktober."
+        />
       </div>
       <template #footer>
         <div class="flex justify-between gap-2">

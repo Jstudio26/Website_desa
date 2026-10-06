@@ -14,7 +14,12 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
   ],
 
-  css: ['~/assets/css/main.css'],
+  // Font di-host sendiri (bukan Google Fonts) supaya tidak ada request render-blocking ke pihak ketiga.
+  css: [
+    '@fontsource-variable/plus-jakarta-sans/wght.css',
+    '@fontsource-variable/plus-jakarta-sans/wght-italic.css',
+    '~/assets/css/main.css',
+  ],
 
   typescript: {
     strict: true,

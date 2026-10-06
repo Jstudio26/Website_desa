@@ -2,6 +2,8 @@
 import type { Database } from '~/types/supabase'
 import type { Official, SettingsData } from '~/types/database'
 import { DEFAULT_SETTINGS } from '~/composables/useSettings'
+import { formatNumber } from '~/utils/format'
+import { AGE_BANDS, ageBandLabel } from '~/config/penduduk'
 
 definePageMeta({ layout: 'admin' })
 
@@ -27,9 +29,40 @@ const { data: loaded } = await useAsyncData('admin-settings', async () => {
 Object.assign(form, DEFAULT_SETTINGS, loaded.value, {
   social: { ...DEFAULT_SETTINGS.social, ...(loaded.value?.social ?? {}) },
   demographics: { ...DEFAULT_SETTINGS.demographics, ...(loaded.value?.demographics ?? {}) },
+  // One editable row per band, so the inputs never write into a shared/missing object.
+  ageDistribution: Object.fromEntries(AGE_BANDS.map((b) => [b, {
+    male: loaded.value?.ageDistribution?.[b]?.male ?? null,
+    female: loaded.value?.ageDistribution?.[b]?.female ?? null,
+  }])),
 })
 missionText.value = (form.mission ?? []).join('\n')
 loading.value = false
+
+const ageTotals = computed(() => {
+  let male = 0, female = 0
+  for (const b of AGE_BANDS) {
+    male += numOrNull(form.ageDistribution[b]?.male) ?? 0
+    female += numOrNull(form.ageDistribution[b]?.female) ?? 0
+  }
+  return { male, female }
+})
+// Hint only, like genderMismatch: point out when the table and the totals above disagree.
+const ageTotalsMismatch = computed(() => {
+  const { male, female } = ageTotals.value
+  if (!male && !female) return false
+  const m = numOrNull(form.demographics.male)
+  const f = numOrNull(form.demographics.female)
+  return (m != null && m !== male) || (f != null && f !== female)
+})
+
+// Only a hint: the public chart uses laki-laki + perempuan as its own total.
+const genderMismatch = computed(() => {
+  const m = numOrNull(form.demographics.male)
+  const f = numOrNull(form.demographics.female)
+  const p = numOrNull(form.population)
+  if (m == null || f == null || p == null || m + f === p) return null
+  return { sum: m + f, population: p }
+})
 
 async function uploadTo(key: 'logoUrl' | 'heroImageUrl', e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
@@ -37,7 +70,8 @@ async function uploadTo(key: 'logoUrl' | 'heroImageUrl', e: Event) {
   if (!file) return
   try {
     const old = form[key]
-    form[key] = await upload(file, 'profil')
+    // Logo hanya tampil ±32px (header/footer), jadi cukup 256px — file 512px PNG = ~130 KB per halaman.
+    form[key] = await upload(file, 'profil', key === 'logoUrl' ? { maxSize: 256 } : {})
     if (old) removeMedia(old)
   }
   catch (err) {
@@ -56,6 +90,8 @@ async function saveSettings() {
       hamlets: numOrNull(form.hamlets),
       areaKm2: numOrNull(form.areaKm2),
       demographics: {
+        male: numOrNull(form.demographics.male),
+        female: numOrNull(form.demographics.female),
         balita0_11: numOrNull(form.demographics.balita0_11),
         balita1_2: numOrNull(form.demographics.balita1_2),
         balita2_3: numOrNull(form.demographics.balita2_3),
@@ -66,6 +102,10 @@ async function saveSettings() {
         lansia70_79: numOrNull(form.demographics.lansia70_79),
         lansia80Plus: numOrNull(form.demographics.lansia80Plus),
       },
+      ageDistribution: Object.fromEntries(AGE_BANDS.map((b) => [b, {
+        male: numOrNull(form.ageDistribution[b]?.male),
+        female: numOrNull(form.ageDistribution[b]?.female),
+      }])),
     }
     const { error } = await supabase
       .from('settings')
@@ -215,6 +255,15 @@ useHead({ title: 'Profil Kelurahan' })
           <UiInput v-model="form.email" label="Email" type="email" />
           <UiInput v-model="form.whatsapp" label="WhatsApp" hint="Nomor, mis. 6281234567890" />
           <UiInput v-model="form.mapEmbedUrl" label="URL Embed Peta (Google Maps)" hint="Bagikan → Sematkan peta → salin src iframe." />
+          <div class="sm:col-span-2">
+            <UiTextarea
+              v-model="form.officeHours"
+              label="Jam Pelayanan"
+              :rows="3"
+              placeholder="Senin–Kamis: 08.00–15.00&#10;Jumat: 08.00–11.30&#10;Sabtu, Minggu & hari libur: tutup"
+              hint="Satu baris per hari/rentang. Tampil di halaman Kontak, Layanan Surat, dan Cek Status."
+            />
+          </div>
           <UiInput v-model="form.social.instagram" label="Instagram (URL)" />
           <UiInput v-model="form.social.facebook" label="Facebook (URL)" />
           <UiInput v-model="form.social.youtube" label="YouTube (URL)" />
@@ -236,9 +285,21 @@ useHead({ title: 'Profil Kelurahan' })
       <!-- Data kependudukan -->
       <section class="rounded-theme border border-line bg-surface p-5 sm:p-6">
         <h2 class="font-heading text-lg font-semibold">Data Kependudukan</h2>
-        <p class="mt-1 text-sm text-ink-muted">Rincian jumlah penduduk per kelompok umur.</p>
+        <p class="mt-1 text-sm text-ink-muted">Rincian jumlah penduduk menurut jenis kelamin dan kelompok umur.</p>
 
-        <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">Balita</p>
+        <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">Jenis Kelamin</p>
+        <div class="mt-2 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <UiInput v-model="form.demographics.male" label="Laki-laki" type="number" />
+          <UiInput v-model="form.demographics.female" label="Perempuan" type="number" />
+        </div>
+        <p
+          v-if="genderMismatch"
+          class="mt-2 text-xs text-ink-muted"
+        >
+          Laki-laki + perempuan = {{ formatNumber(genderMismatch.sum) }}, berbeda dari jumlah penduduk ({{ formatNumber(genderMismatch.population) }}).
+        </p>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-wide text-ink-muted">Balita</p>
         <div class="mt-2 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
           <UiInput v-model="form.demographics.balita0_11" label="0 - 11 bulan" type="number" />
           <UiInput v-model="form.demographics.balita1_2" label="1 - 2 tahun" type="number" />
@@ -258,6 +319,44 @@ useHead({ title: 'Profil Kelurahan' })
           <UiInput v-model="form.demographics.lansia70_79" label="70 - 79 tahun" type="number" />
           <UiInput v-model="form.demographics.lansia80Plus" label="80 tahun ke atas" type="number" />
         </div>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-wide text-ink-muted">Persebaran Umur (Piramida Penduduk)</p>
+        <p class="mt-1 text-xs text-ink-muted">Jumlah penduduk per kelompok umur lima tahunan. Kosongkan jika belum ada data.</p>
+        <div class="mt-2 max-w-xl overflow-hidden rounded-theme border border-line">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-muted text-left text-xs text-ink-muted">
+              <tr>
+                <th scope="col" class="px-3 py-2 font-semibold">Kelompok Umur</th>
+                <th scope="col" class="px-3 py-2 font-semibold">Laki-laki</th>
+                <th scope="col" class="px-3 py-2 font-semibold">Perempuan</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              <tr v-for="b in AGE_BANDS" :key="b">
+                <th scope="row" class="whitespace-nowrap px-3 py-1.5 text-left font-medium text-ink">{{ ageBandLabel(b) }}</th>
+                <td v-for="sex in (['male', 'female'] as const)" :key="sex" class="px-3 py-1.5">
+                  <input
+                    v-model="form.ageDistribution[b]![sex]"
+                    type="number"
+                    min="0"
+                    :aria-label="`${sex === 'male' ? 'Laki-laki' : 'Perempuan'}, ${ageBandLabel(b)}`"
+                    class="w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm tabular-nums text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  >
+                </td>
+              </tr>
+            </tbody>
+            <tfoot class="border-t border-line bg-surface-muted/60 font-semibold tabular-nums">
+              <tr>
+                <th scope="row" class="px-3 py-2 text-left">Total</th>
+                <td class="px-3 py-2">{{ formatNumber(ageTotals.male) }}</td>
+                <td class="px-3 py-2">{{ formatNumber(ageTotals.female) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p v-if="ageTotalsMismatch" class="mt-2 text-xs text-ink-muted">
+          Total tabel berbeda dari isian Laki-laki / Perempuan di atas. Periksa kembali agar diagram konsisten.
+        </p>
       </section>
 
       <!-- Visi misi -->

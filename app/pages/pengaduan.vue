@@ -6,16 +6,19 @@ const supabase = useSupabaseClient<Database>()
 const toast = useToast()
 const { upload } = useMedia()
 
-const form = reactive({ name: '', phone: '', category: COMPLAINT_CATEGORIES[0], location: '', description: '', photo_url: '' as string | null })
+const form = reactive({ name: '', phone: '', category: COMPLAINT_CATEGORIES[0] as string, location: '', description: '', photo_url: '' as string | null })
 const errors = reactive<Record<string, string>>({})
 const sending = ref(false)
 const uploading = ref(false)
-const sent = ref(false)
+const ticket = ref<string | null>(null)
+const formEl = ref<HTMLElement | null>(null)
 
 function validate() {
-  errors.name = form.name.trim() ? '' : 'Nama wajib diisi.'
+  const digits = form.phone.replace(/D/g, '')
+  errors.name = form.name.trim().length >= 2 ? '' : 'Nama wajib diisi.'
+  errors.phone = !digits || (digits.length >= 9 && digits.length <= 15) ? '' : 'Nomor telepon/WA tidak valid.'
   errors.description = form.description.trim().length >= 10 ? '' : 'Uraian minimal 10 karakter.'
-  return !errors.name && !errors.description
+  return !errors.name && !errors.phone && !errors.description
 }
 
 async function onPhoto(e: Event) {
@@ -24,7 +27,8 @@ async function onPhoto(e: Event) {
   if (!file) return
   uploading.value = true
   try {
-    form.photo_url = await upload(file, 'pengaduan')
+    // Foto HP bisa >5 MB; perkecil dulu (1600px cukup untuk bukti lapangan).
+    form.photo_url = await upload(file, 'pengaduan', { maxSize: 1600 })
   }
   catch (err) {
     toast.error('Gagal mengunggah foto', err instanceof Error ? err.message : '')
@@ -38,20 +42,20 @@ async function submit() {
   if (!validate()) return
   sending.value = true
   try {
-    const { error } = await supabase.from('complaints').insert({
-      name: form.name.trim(),
-      phone: form.phone.trim() || null,
-      category: form.category,
-      location: form.location.trim() || null,
-      description: form.description.trim(),
-      photo_url: form.photo_url || null,
+    const { data, error } = await supabase.rpc('kirim_pengaduan', {
+      p_name: form.name.trim(),
+      p_category: form.category,
+      p_description: form.description.trim(),
+      p_phone: form.phone.trim() || null,
+      p_location: form.location.trim() || null,
+      p_photo_url: form.photo_url || null,
     })
     if (error) throw error
-    sent.value = true
-    toast.success('Pengaduan terkirim', 'Terima kasih, laporan Anda akan kami tindak lanjuti.')
+    ticket.value = data
     form.name = form.phone = form.location = form.description = ''
-    form.category = COMPLAINT_CATEGORIES[0]
+    form.category = COMPLAINT_CATEGORIES[0] as string
     form.photo_url = null
+    formEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
   catch (e) {
     toast.error('Gagal mengirim', e instanceof Error ? e.message : 'Coba lagi beberapa saat.')
@@ -73,13 +77,33 @@ useHead({ title: 'Pengaduan Masyarakat' })
     />
 
     <div class="section container-app">
-      <div class="mx-auto max-w-2xl accent-top rounded-theme border border-line/80 bg-surface p-6 shadow-card sm:p-8">
+      <div ref="formEl" v-reveal class="mx-auto max-w-2xl scroll-mt-28 accent-top rounded-theme border border-line/80 bg-surface p-6 shadow-card sm:p-8">
+        <TicketSuccess
+          v-if="ticket"
+          :code="ticket"
+          title="Pengaduan terkirim"
+          message="Terima kasih. Tanggapan petugas bisa Anda lihat lewat Cek Status dengan kode di bawah."
+          @again="ticket = null"
+        />
+        <template v-else>
         <h2 class="font-heading text-2xl font-extrabold">Formulir Pengaduan</h2>
-        <p class="mt-1.5 text-sm text-ink-muted">Sertakan foto jika ada, agar penanganan lebih cepat dan akurat.</p>
-        <form class="mt-6 space-y-4" @submit.prevent="submit">
+        <p class="mt-1.5 text-sm text-ink-muted">
+          Sertakan foto jika ada, agar penanganan lebih cepat dan akurat. Sudah pernah melapor?
+          <NuxtLink to="/cek-status" class="font-semibold text-primary hover:underline">Cek status pengaduan</NuxtLink>
+        </p>
+        <form class="mt-6 space-y-4" novalidate @submit.prevent="submit">
           <div class="grid gap-4 sm:grid-cols-2">
-            <UiInput v-model="form.name" label="Nama" required :error="errors.name" />
-            <UiInput v-model="form.phone" label="Telepon / WA" placeholder="opsional" />
+            <UiInput v-model="form.name" label="Nama" required autocomplete="name" :error="errors.name" />
+            <UiInput
+              v-model="form.phone"
+              label="Telepon / WA"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="Opsional"
+              hint="Agar petugas bisa menghubungi bila perlu."
+              :error="errors.phone"
+            />
           </div>
           <UiSelect
             v-model="form.category"
@@ -102,11 +126,13 @@ useHead({ title: 'Pengaduan Masyarakat' })
             </div>
           </div>
 
-          <UiButton type="submit" :loading="sending" block size="lg">Kirim Pengaduan</UiButton>
-          <p v-if="sent" class="flex items-center gap-2 text-sm font-medium text-primary">
-            <AppIcon name="check" :size="16" /> Pengaduan Anda sudah terkirim. Terima kasih!
+          <p class="flex gap-2 rounded-theme bg-surface-muted px-3 py-2.5 text-xs text-ink-muted">
+            <AppIcon name="shield" :size="15" class="mt-0.5 shrink-0 text-primary" />
+            <span>Nama dan nomor Anda hanya dapat dilihat petugas kelurahan dan tidak ditampilkan ke publik.</span>
           </p>
+          <UiButton type="submit" :loading="sending" :disabled="uploading" block size="lg">Kirim Pengaduan</UiButton>
         </form>
+        </template>
       </div>
     </div>
   </div>

@@ -30,8 +30,9 @@ useHead({ title: 'Galeri' })
     <section class="section container-app">
       <div v-if="items?.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         <button
-          v-for="g in items"
+          v-for="(g, i) in items"
           :key="g.id"
+          v-reveal="i % 4"
           class="group relative aspect-square overflow-hidden rounded-xl bg-surface-muted shadow-card ring-1 ring-line/60 transition hover:ring-primary/40"
           @click="show(g)"
         >

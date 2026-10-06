@@ -51,8 +51,9 @@ useHead({ title: props.title })
       <template v-else-if="data && data.items.length">
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <NuxtLink
-            v-for="p in data.items"
+            v-for="(p, i) in data.items"
             :key="p.id"
+            v-reveal="i % 3"
             :to="`/${type}/${p.slug}`"
             class="card card-hover group flex flex-col overflow-hidden"
           >
@@ -72,9 +73,9 @@ useHead({ title: props.title })
               </span>
             </div>
             <div class="flex flex-1 flex-col p-5">
-              <h3 class="font-heading text-lg font-bold leading-snug text-ink transition group-hover:text-primary">
+              <h2 class="font-heading text-lg font-bold leading-snug text-ink transition group-hover:text-primary">
                 {{ p.title }}
-              </h3>
+              </h2>
               <p v-if="p.excerpt" class="mt-2 line-clamp-3 text-sm text-ink-muted">{{ p.excerpt }}</p>
               <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
                 Selengkapnya <AppIcon name="arrowRight" :size="14" class="transition group-hover:translate-x-1" />

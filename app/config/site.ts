@@ -20,6 +20,7 @@ export const NAV: NavItem[] = [
     children: [
       { id: 'profil', label: 'Profil Kelurahan', url: '/profil' },
       { id: 'data-penduduk', label: 'Data Penduduk', url: '/data-penduduk' },
+      { id: 'potensi', label: 'Potensi Kelurahan', url: '/potensi' },
       { id: 'organisasi', label: 'Organisasi', url: '/organisasi' },
       { id: 'peta', label: 'Peta Wilayah', url: '/peta' },
     ],
@@ -34,8 +35,10 @@ export const NAV: NavItem[] = [
     children: [
       { id: 'layanan-surat', label: 'Layanan Surat', url: '/layanan-surat' },
       { id: 'pengaduan', label: 'Pengaduan', url: '/pengaduan' },
+      { id: 'cek-status', label: 'Cek Status', url: '/cek-status' },
     ],
   },
+  { id: 'posko-kkt', label: 'Posko KKT', url: '/posko-kkt', children: [] },
 ]
 
 export const FOOTER_COLUMNS: { title: string, links: { label: string, url: string }[] }[] = [
@@ -45,6 +48,7 @@ export const FOOTER_COLUMNS: { title: string, links: { label: string, url: strin
       { label: 'Berita', url: '/berita' },
       { label: 'Pengumuman', url: '/pengumuman' },
       { label: 'Galeri', url: '/galeri' },
+      { label: 'Posko KKT 149', url: '/posko-kkt' },
     ],
   },
   {
@@ -52,6 +56,7 @@ export const FOOTER_COLUMNS: { title: string, links: { label: string, url: strin
     links: [
       { label: 'Profil Kelurahan', url: '/profil' },
       { label: 'Data Penduduk', url: '/data-penduduk' },
+      { label: 'Potensi Kelurahan', url: '/potensi' },
       { label: 'Organisasi', url: '/organisasi' },
       { label: 'Peta Wilayah', url: '/peta' },
     ],
@@ -61,6 +66,7 @@ export const FOOTER_COLUMNS: { title: string, links: { label: string, url: strin
     links: [
       { label: 'Layanan Surat', url: '/layanan-surat' },
       { label: 'Pengaduan', url: '/pengaduan' },
+      { label: 'Cek Status', url: '/cek-status' },
       { label: 'Kontak', url: '/kontak' },
     ],
   },
