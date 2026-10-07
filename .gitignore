@@ -29,3 +29,6 @@ Thumbs.db
 *.geojson
 *.zip
 /Batas Kelurahan Kota Tomohon/
+
+# Output build lokal preset Vercel
+.vercel
