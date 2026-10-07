@@ -10,7 +10,7 @@ const { settings } = useSettings()
       :src="image"
       alt=""
       class="absolute inset-0 h-full w-full object-cover opacity-20"
-      sizes="100vw"
+      sizes="sm:100vw md:100vw lg:100vw xl:100vw xxl:100vw"
     />
     <div class="bg-mesh absolute inset-0" />
     <div class="pattern-flag absolute inset-0 opacity-60" />

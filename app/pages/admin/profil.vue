@@ -71,7 +71,8 @@ async function uploadTo(key: 'logoUrl' | 'heroImageUrl', e: Event) {
   try {
     const old = form[key]
     // Logo hanya tampil ±32px (header/footer), jadi cukup 256px — file 512px PNG = ~130 KB per halaman.
-    form[key] = await upload(file, 'profil', key === 'logoUrl' ? { maxSize: 256 } : {})
+    // Foto hero cukup 1920px (lebar layar terbesar); foto kamera/HP bisa >5 MB.
+    form[key] = await upload(file, 'profil', { maxSize: key === 'logoUrl' ? 256 : 1920 })
     if (old) removeMedia(old)
   }
   catch (err) {

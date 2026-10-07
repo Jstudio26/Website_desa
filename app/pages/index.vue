@@ -49,12 +49,14 @@ useHead(() => ({
   <div>
     <!-- ---------------- Hero ---------------- -->
     <section class="grain relative overflow-hidden bg-primary-deep text-white">
+      <!-- Layar ≥ sm: foto jadi latar. Di HP latar setinggi ini memotong foto lebar (16:9)
+           jadi hanya bagian tengahnya; di sana foto tampil utuh sebagai kartu di bawah teks. -->
       <NuxtImg
         v-if="settings.heroImageUrl"
         :src="settings.heroImageUrl"
         alt=""
-        class="absolute inset-0 h-full w-full object-cover opacity-25"
-        sizes="100vw"
+        class="absolute inset-0 hidden h-full w-full object-cover opacity-25 sm:block"
+        sizes="sm:100vw md:100vw lg:100vw xl:100vw xxl:100vw"
         preload
       />
       <div class="bg-mesh absolute inset-0" />
@@ -81,6 +83,14 @@ useHead(() => ({
             Berita Terbaru
           </UiButton>
         </div>
+
+        <NuxtImg
+          v-if="settings.heroImageUrl"
+          :src="settings.heroImageUrl"
+          :alt="`Foto ${settings.villageName}`"
+          class="mt-8 aspect-video w-full rounded-theme object-cover shadow-lift ring-1 ring-white/25 sm:hidden"
+          sizes="100vw sm:100vw"
+        />
       </div>
 
       <WaveDivider class="relative -mb-px" color="text-canvas" />

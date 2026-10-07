@@ -1,4 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+// Host Supabase Storage, mis. xxxx.supabase.co (gambar konten diunggah ke sana).
+const supabaseHost = process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).host : ''
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   future: {
@@ -48,6 +52,10 @@ export default defineNuxtConfig({
   image: {
     quality: 72,
     format: ['webp'],
+    // Di Vercel: gambar dari Supabase diperkecil sesuai lebar layar & dikonversi WebP oleh
+    // optimizer Vercel (foto 2 MB -> puluhan KB di HP). Lokal tidak diaktifkan karena
+    // optimizer lokal (ipx) butuh sharp, yang binary-nya tidak tersedia di Windows.
+    domains: process.env.VERCEL && supabaseHost ? [supabaseHost] : [],
   },
 
   app: {
