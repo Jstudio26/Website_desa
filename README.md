@@ -30,7 +30,7 @@ mengelola konten dan melihat data warga — sekadar bisa login tidak cukup.
 Tidak ada API backend sendiri. Halaman membaca Supabase langsung; formulir publik memanggil
 fungsi SQL (`ajukan_surat`, `kirim_pengaduan`, `kirim_pesan`, `cek_status`) yang memvalidasi
 isian dan membatasi spam. Keamanan ditegakkan oleh RLS di `supabase/schema.sql`.
-Folder `server/` hanya berisi `robots.txt`, `sitemap.xml`, dan polyfill WebSocket untuk Node 20.
+Folder `server/` hanya berisi `robots.txt`, `sitemap.xml`, endpoint keep-alive, dan polyfill WebSocket untuk Node 20.
 
 ---
 
@@ -74,14 +74,17 @@ Ukur dari `npm run build` → `node .output/server/index.mjs`, di jendela Incogn
 - [ ] Jalankan versi terbaru `supabase/schema.sql`.
 - [ ] Daftarkan email admin di tabel `admins` (lihat Setup langkah 3).
 - [ ] **Authentication → URL Configuration**: isi *Site URL* dengan domain produksi
-      (mis. `https://matanitiga.example.id`) dan tambahkan `https://<domain>/confirm`
+      (`https://matanitiga.site`) dan tambahkan `https://<domain>/confirm`
       ke *Redirect URLs*.
 
 **Vercel**
 
 - [ ] Import repo GitHub. Preset *Nuxt* terdeteksi otomatis; Node 20 atau lebih baru.
 - [ ] Environment variables (Production): `SUPABASE_URL`, `SUPABASE_KEY` (anon key),
-      `NUXT_PUBLIC_SITE_URL` (domain produksi), `APP_NAME`.
+      `NUXT_PUBLIC_SITE_URL` (domain produksi), `APP_NAME`, dan `CRON_SECRET`
+      (string acak panjang, mis. hasil `openssl rand -hex 32`).
+- [ ] Setelah deploy, buka **Settings → Cron Jobs**: pastikan `/api/keepalive` terdaftar,
+      lalu klik **Run** sekali dan cek hasilnya sukses (lihat "Keep-alive database" di bawah).
 - [ ] Hubungkan domain, lalu cek `https://<domain>/robots.txt` dan `/sitemap.xml`.
 
 > Urutan penting: jalankan `schema.sql` **berbarengan** dengan deploy kode terbaru. Kode lama
@@ -102,6 +105,23 @@ Ukur dari `npm run build` → `node .output/server/index.mjs`, di jendela Incogn
 
 ---
 
+## Keep-alive database
+
+Supabase paket gratis **mem-pause project setelah 7 hari tanpa aktivitas**; website lalu
+tidak bisa memuat data sampai project di-*restore* manual dari dashboard Supabase.
+
+Pencegahannya: [`vercel.json`](vercel.json) mendaftarkan **Vercel Cron** yang memanggil
+[`/api/keepalive`](server/api/keepalive.get.ts) setiap hari pukul 01.00 UTC (09.00 WITA).
+Endpoint itu menjalankan query kecil ke tabel `settings`, cukup untuk dihitung sebagai aktivitas.
+
+- Cron hanya berjalan di deployment **Production** Vercel (bukan lokal / preview).
+- Dengan `CRON_SECRET` di-set, permintaan tanpa header yang benar ditolak (401).
+- Cek riwayat run di Vercel → project → **Settings → Cron Jobs** / **Logs**. Run yang gagal
+  (database tidak terjangkau) tercatat sebagai error 503.
+- Bila project terlanjur di-pause: Supabase Dashboard → project → **Restore**.
+
+---
+
 ## Struktur
 
 ```
@@ -114,6 +134,8 @@ app/
 ├── utils/                  # format, geoImport (GeoJSON/SHP), landmarkMap, icons
 └── types/                  # tipe baris tabel + tipe Database supabase-js
 server/routes/              # robots.txt, sitemap.xml
+server/api/keepalive.get.ts  # dipanggil Vercel Cron harian agar Supabase tidak di-pause
+vercel.json                  # jadwal cron
 supabase/schema.sql         # skema + RLS + fungsi + seed — jalankan di SQL Editor
 ```
 

@@ -7,6 +7,7 @@ export default defineEventHandler((event) => {
     'Allow: /',
     'Disallow: /admin',
     'Disallow: /confirm',
+    'Disallow: /api',
     '',
     `Sitemap: ${origin}/sitemap.xml`,
     '',

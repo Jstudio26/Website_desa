@@ -47,5 +47,8 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "overrides": {
+    "eslint-flat-config-utils": "2.1.4"
   }
 }
