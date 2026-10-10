@@ -113,6 +113,9 @@ useHead(() => ({
       </div>
     </div>
 
+    <!-- ---------------- Cuaca BMKG ---------------- -->
+    <WeatherSection />
+
     <!-- ---------------- Intro + Pengumuman ---------------- -->
     <section class="section container-app">
       <div class="grid gap-10 lg:grid-cols-[1.5fr_1fr]">
